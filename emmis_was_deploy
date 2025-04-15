@@ -1,0 +1,9 @@
+---
+- name: Deploy EAR to WebSphere
+  hosts: all
+  become: yes
+  tasks:
+    - name: Copy EAR file from Jenkins
+      get_url:
+        url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/view/eMMIS/job/eMMIS-DXCD/86/"
+        dest: /tmp
