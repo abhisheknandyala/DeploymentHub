@@ -1,6 +1,6 @@
 ---
 - name: Download EAR file from Jenkins to /tmp on Docker Host
-  hosts: all
+  hosts: Docker02
   become: yes
   tasks:
     - name: Download EAR file
