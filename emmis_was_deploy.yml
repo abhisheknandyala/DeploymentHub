@@ -1,9 +1,10 @@
 ---
-- name: Deploy EAR to WebSphere
-  hosts: all
+- name: Download EAR file from Jenkins to /tmp on Docker Host
+  hosts: Docker02
   become: yes
   tasks:
-    - name: Copy EAR file from Jenkins
+    - name: Download EAR file
       get_url:
-        url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/view/eMMIS/job/eMMIS-DXCD/86/"
-        dest: /tmp
+        url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/job/eMMIS-DXCD/lastSuccessfulBuild/artifact/builds/emmis.ear"
+        dest: /tmp/medicaid_EAR6.ear
+        mode: '0644'
