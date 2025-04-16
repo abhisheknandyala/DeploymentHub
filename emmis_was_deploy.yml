@@ -5,6 +5,6 @@
   tasks:
     - name: Download EAR file
       get_url:
-        url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/view/eMMIS/job/eMMIS-DXCD/86/medicaid_EAR6.ear"
+        url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/job/eMMIS-DXCD/lastSuccessfulBuild/"
         dest: /tmp/medicaid_EAR6.ear
         mode: '0644'
