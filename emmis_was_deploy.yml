@@ -9,4 +9,5 @@
         dest: /home/anandyala/medicaid_EAR6.ear
         url_username: "anandyala"
         url_password: "11cee16aa7204b41b314196cea7f651910"
+        force_basic_auth: yes
         mode: '0644'
