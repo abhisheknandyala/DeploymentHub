@@ -7,6 +7,7 @@
       get_url:
         url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/job/eMMIS-DXCD/lastSuccessfulBuild/"
         dest: /home/anandyala/medicaid_EAR6.ear
+        dest: /home/anandyala/medicaidSupplementsEAR.ear
         url_username: "{{ jenkins_user }}"
         url_password: "{{ jenkins_token }}"
         force_basic_auth: yes
