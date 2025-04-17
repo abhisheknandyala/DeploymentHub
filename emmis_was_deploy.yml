@@ -5,7 +5,7 @@
   tasks:
     - name: Download EAR file
       get_url:
-        url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/job/eMMIS-DXCD/lastSuccessfulBuild/"
+        url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/job/eMMIS-DXCD/lastSuccessfulBuild/medicaid_EAR6.ear"
         dest: /home/anandyala/medicaid_EAR6.ear
         url_username: "anandyala"
         url_password: "11cee16aa7204b41b314196cea7f651910"
