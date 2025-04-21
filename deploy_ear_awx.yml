@@ -1,6 +1,6 @@
 ---
 - name: Deploy Multiple EARs to WebSphere
-  hosts: Docker02
+  hosts: 10.112.30.40
   become: yes
 
   vars:
