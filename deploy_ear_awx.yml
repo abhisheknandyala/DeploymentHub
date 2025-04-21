@@ -1,4 +1,4 @@
-- name: Download and Deploy Multiple EARs from Jenkins
+- name: Download and Deploy Single EAR to WebSphere
   hosts: 10.112.30.40
   become: yes
 
@@ -7,14 +7,8 @@
     jenkins_token: your_token
     docker_container_name: "emmis-t6"
     wsadmin_path: "/opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin/wsadmin.sh"
-
-    ear_downloads:
-      - url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/job/eMMIS-DXCD/lastSuccessfulBuild/medicaid_EAR6.ear"
-        dest: "/opt/WAS/ear/medicaid_EAR6.ear"
-        filename: "medicaid_EAR6.ear"
-      - url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/job/eMMIS-DXCD/lastSuccessfulBuild/medicaidSupplementsEAR.ear"
-        dest: "/opt/WAS/ear/medicaidSupplementsEAR.ear"
-        filename: "medicaidSupplementsEAR.ear"
+    ear_url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/job/eMMIS-DXCD/lastSuccessfulBuild/medicaid_EAR6.ear"
+    ear_dest_path: "/opt/WAS/ear/medicaid_EAR6.ear"
 
   tasks:
     - name: Ensure destination directory exists
@@ -23,18 +17,17 @@
         state: directory
         mode: '0755'
 
-    - name: Download EAR files from Jenkins
+    - name: Download EAR file from Jenkins
       get_url:
-        url: "{{ item.url }}"
-        dest: "{{ item.dest }}"
+        url: "{{ ear_url }}"
+        dest: "{{ ear_dest_path }}"
         url_username: "{{ jenkins_user }}"
         url_password: "{{ jenkins_token }}"
         force_basic_auth: yes
         mode: '0644'
-      loop: "{{ ear_downloads }}"
 
-    - name: Deploy each EAR inside Docker container using wsadmin
+    - name: Deploy EAR inside Docker container using wsadmin
       command: >
-        docker exec {{ docker_container_name }} {{ wsadmin_path }}
-        -lang jython -f /opt/WAS/scripts/deploy_was_script.py {{ item.dest }}
-      loop: "{{ ear_downloads }}"
+        docker exec {{ docker_container_name }}
+        {{ wsadmin_path }}
+        -lang jython -f /opt/WAS/scripts/deploy_was_script.py {{ ear_dest_path }}
