@@ -4,7 +4,7 @@
   become: yes
 
   vars:
-    jenkins_base_url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/job/eMMIS-DXCD/lastSuccessfulBuild"
+    jenkins_base_url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/job/eMMIS-DXCD/lastSuccessfulBuild/artifact"
     ear_files:
       - medicaid_EAR6.ear
       - medicaidSupplementsEAR.ear
@@ -25,6 +25,7 @@
         dest: "{{ ear_dest_dir }}/{{ item }}"
         url_username: "{{ jenkins_user }}"
         url_password: "{{ jenkins_token }}"
+        force_basic_auth: yes
         mode: '0644'
       loop: "{{ ear_files }}"
 
