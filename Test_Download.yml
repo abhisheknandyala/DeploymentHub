@@ -3,7 +3,7 @@
   vars:
     jenkins_user: your_user
     jenkins_token: your_token
-    test_url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/job/eMMIS-DXCD/lastSuccessfulBuild/artifact/builds/medicaid_EAR6.ear"
+    test_url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/job/eMMIS-DXCD/lastSuccessfulBuild/medicaid_EAR6.ear"
   tasks:
     - name: Try downloading one EAR
       get_url:
