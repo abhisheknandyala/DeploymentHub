@@ -1,17 +1,19 @@
-- name: Download and Deploy Single EAR to WebSphere
+- name: Download and Deploy EAR to WebSphere
   hosts: 10.112.30.40
   become: yes
 
   vars:
-    jenkins_user: your_user
-    jenkins_token: your_token
+    jenkins_user: "{{ jenkins_user }}"
+    jenkins_token: "{{ jenkins_token }}"
     docker_container_name: "emmis-t6"
     wsadmin_path: "/opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin/wsadmin.sh"
-    ear_url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/job/eMMIS-DXCD/lastSuccessfulBuild/medicaid_EAR6.ear"
-    ear_dest_path: "/opt/WAS/ear/medicaid_EAR6.ear"
+    
+    ear_name: "medicaid_EAR6.ear"  # You can override this in AWX Job Template
+    ear_url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/job/eMMIS-DXCD/lastSuccessfulBuild/artifact/builds/{{ ear_name }}"
+    ear_dest_path: "/opt/WAS/ear/{{ ear_name }}"
 
   tasks:
-    - name: Ensure destination directory exists
+    - name: Ensure EAR destination directory exists
       file:
         path: "/opt/WAS/ear"
         state: directory
