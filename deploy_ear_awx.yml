@@ -1,0 +1,37 @@
+---
+- name: Deploy Multiple EARs to WebSphere
+  hosts: Docker02
+  become: yes
+
+  vars:
+    jenkins_base_url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/job/eMMIS-DXCD/lastSuccessfulBuild/"
+    ear_files:
+      - medicaid_EAR6.ear
+      - medicaidSupplementsEAR.ear
+    ear_dest_dir: "/opt/WAS/ear"
+    docker_container_name: "emmis-t6"
+    wsadmin_path: "/opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin/wsadmin.sh"
+
+  tasks:
+    - name: Ensure EAR destination directory exists
+      file:
+        path: "{{ ear_dest_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: Download EAR files from Jenkins
+      get_url:
+        url: "{{ jenkins_base_url }}/{{ item }}"
+        dest: "{{ ear_dest_dir }}/{{ item }}"
+        url_username: "{{ jenkins_user }}"
+        url_password: "{{ jenkins_token }}"
+        mode: '0644'
+      loop: "{{ ear_files }}"
+
+    - name: Deploy each EAR inside Docker container
+      command: >
+        docker exec {{ docker_container_name }}
+        {{ wsadmin_path }}
+        -lang jython
+        -f /opt/WAS/scripts/deploy_was_script.py {{ ear_dest_dir }}/{{ item }}
+      loop: "{{ ear_files }}"

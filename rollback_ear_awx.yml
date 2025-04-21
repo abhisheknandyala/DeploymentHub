@@ -1,0 +1,17 @@
+---
+- name: Rollback EAR Deployment
+  hosts: Docker02
+  become: yes
+
+  vars:
+    ear_dest_path: "/opt/WAS/ear/medicaid_EAR6.ear"
+    ear_backup_path: "/opt/WAS/ear/medicaid_EAR6_backup.ear"
+    docker_container_name: "emmis-t6"
+    wsadmin_path: "/opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin"
+
+  tasks:
+    - name: Restore backup EAR file
+      command: mv {{ ear_backup_path }} {{ ear_dest_path }}
+
+    - name: Redeploy original EAR file
+      command: docker exec {{ docker_container_name }} {{ wsadmin_path }} -lang jython -f /opt/WAS/scripts/deploy_script.py {{ ear_dest_path }}
