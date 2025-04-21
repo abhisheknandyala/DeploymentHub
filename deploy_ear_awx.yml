@@ -8,7 +8,7 @@
     docker_container_name: "emmis-t6"
     wsadmin_path: "/opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin/wsadmin.sh"
     
-    ear_name: "medicaid_EAR6.ear"  # You can override this in AWX Job Template
+    ear_name: "medicaid_EAR6.ear"  # You can override this in AWX Template
     ear_url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/job/eMMIS-DXCD/lastSuccessfulBuild/artifact/builds/{{ ear_name }}"
     ear_dest_path: "/opt/WAS/ear/{{ ear_name }}"
 
