@@ -1,14 +1,37 @@
----
-- name: Download EAR file from Jenkins to /tmp on Docker Host
+- name: Download EAR files from Jenkins to /tmp on Docker Host
   hosts: 10.112.30.40
   become: yes
+
+  vars:
+    jenkins_user: "{{ jenkins_user }}"
+    jenkins_token: "{{ jenkins_token }}"
+
   tasks:
-    - name: Download EAR file
+    - name: Download medicaid_EAR6.ear
       get_url:
-        url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/job/eMMIS-DXCD/lastSuccessfulBuild/"
+        url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/job/eMMIS-DXCD/lastSuccessfulBuild/medicaid_EAR6.ear"
         dest: /home/anandyala/medicaid_EAR6.ear
+        url_username: "{{ jenkins_user }}"
+        url_password: "{{ jenkins_token }}"
+        force_basic_auth: yes
+        mode: '0644'
+
+    - name: Download medicaidSupplementsEAR.ear
+      get_url:
+        url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/job/eMMIS-DXCD/lastSuccessfulBuild/medicaidSupplementsEAR.ear"
         dest: /home/anandyala/medicaidSupplementsEAR.ear
         url_username: "{{ jenkins_user }}"
         url_password: "{{ jenkins_token }}"
         force_basic_auth: yes
         mode: '0644'
+    - name: Deploy medicaid_EAR6.ear inside Docker container using wsadmin
+      command: >
+        docker exec emmis-t6 /opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin/wsadmin.sh
+        -lang jython
+        -f /opt/WAS/scripts/deploy_was_script.py /home/anandyala/medicaid_EAR6.ear
+
+    - name: Deploy medicaidSupplementsEAR.ear inside Docker container using wsadmin
+      command: >
+        docker exec emmis-t6 /opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin/wsadmin.sh
+        -lang jython
+        -f /opt/WAS/scripts/deploy_was_script.py /home/anandyala/medicaidSupplementsEAR.ear
