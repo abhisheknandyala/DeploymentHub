@@ -7,7 +7,7 @@
     jenkins_token: your_token
     docker_container_name: "emmis-t6"
     wsadmin_path: "/opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin/wsadmin.sh"
-    ear_url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/job/eMMIS-DXCD/lastSuccessfulBuild/artifact/builds/medicaid_EAR6.ear"
+    ear_url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/job/eMMIS-DXCD/lastSuccessfulBuild/medicaid_EAR6.ear"
     ear_dest_path: "/opt/WAS/ear/medicaid_EAR6.ear"
 
   tasks:
