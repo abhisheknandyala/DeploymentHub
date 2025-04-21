@@ -34,10 +34,16 @@
 
     - name: Deploy medicaid_EAR6.ear inside Docker container using wsadmin
       command: >
-        sudo docker exec emmis-t6 /opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin/wsadmin.sh
-        -lang jython -f /home/anandyala/WAS/scripts/deploy_was_script.py {{ ear_dest_dir }}/medicaid_EAR6.ear
+        docker exec emmis-t6
+        /opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin/wsadmin.sh
+        -lang jython
+        -f /home/anandyala/WAS/scripts/deploy_was_script.py
+        {{ ear_dest_dir }}/medicaid_EAR6.ear
 
     - name: Deploy medicaidSupplementsEAR.ear inside Docker container using wsadmin
       command: >
-        sudo docker exec emmis-t6 /opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin/wsadmin.sh
-        -lang jython -f /home/anandyala/WAS/scripts/deploy_was_script.py {{ ear_dest_dir }}/medicaidSupplementsEAR.ear
+        docker exec emmis-t6
+        /opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin/wsadmin.sh
+        -lang jython
+        -f /home/anandyala/WAS/scripts/deploy_was_script.py
+        {{ ear_dest_dir }}/medicaidSupplementsEAR.ear
