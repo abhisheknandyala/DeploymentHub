@@ -1,13 +1,11 @@
-- name: Download and Deploy Multiple EARs from Jenkins to WebSphere
+- name: Download and Deploy EARs to WebSphere
   hosts: 10.112.30.40
   become: yes
 
   vars:
     jenkins_user: "{{ jenkins_user }}"
     jenkins_token: "{{ jenkins_token }}"
-    docker_container_name: "emmis-t6"
-    wsadmin_path: "/opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin/wsadmin.sh"
-    ear_dest_dir: "/opt/WAS/ear"
+    ear_dest_dir: "/home/anandyala/WAS/ear"
 
     ear_downloads:
       - url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/job/eMMIS-DXCD/lastSuccessfulBuild/artifact/masterBuild/artifacts/medicaid_EAR6.ear"
@@ -16,12 +14,13 @@
         dest: "{{ ear_dest_dir }}/medicaidSupplementsEAR.ear"
 
   tasks:
-
-    - name: Ensure EAR destination directory exists
+    - name: Ensure destination directory exists
       file:
         path: "{{ ear_dest_dir }}"
         state: directory
         mode: '0755'
+        owner: anandyala
+        group: anandyala
 
     - name: Download EAR files from Jenkins
       get_url:
@@ -33,10 +32,12 @@
         mode: '0644'
       loop: "{{ ear_downloads }}"
 
-    - name: Deploy EAR files inside Docker container using wsadmin
+    - name: Deploy medicaid_EAR6.ear inside Docker container using wsadmin
       command: >
-        docker exec {{ docker_container_name }}
-        {{ wsadmin_path }}
-        -lang jython
-        -f /opt/WAS/scripts/deploy_was_script.py {{ item.dest }}
-      loop: "{{ ear_downloads }}"
+        docker exec emmis-t6 /opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin/wsadmin.sh
+        -lang jython -f /opt/WAS/scripts/deploy_was_script.py {{ ear_dest_dir }}/medicaid_EAR6.ear
+
+    - name: Deploy medicaidSupplementsEAR.ear inside Docker container using wsadmin
+      command: >
+        docker exec emmis-t6 /opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin/wsadmin.sh
+        -lang jython -f /opt/WAS/scripts/deploy_was_script.py {{ ear_dest_dir }}/medicaidSupplementsEAR.ear
