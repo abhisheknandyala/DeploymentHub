@@ -4,7 +4,7 @@
   become: yes
 
   vars:
-    jenkins_base_url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/job/eMMIS-DXCD/lastSuccessfulBuild/"
+    jenkins_base_url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/job/eMMIS-DXCD/lastSuccessfulBuild/artifact/builds"
     ear_files:
       - medicaid_EAR6.ear
       - medicaidSupplementsEAR.ear
