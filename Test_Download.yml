@@ -1,0 +1,15 @@
+- name: Test downloading EAR file from Jenkins
+  hosts: localhost
+  vars:
+    jenkins_user: your_user
+    jenkins_token: your_token
+    test_url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/job/eMMIS-DXCD/lastSuccessfulBuild/artifact/builds/medicaid_EAR6.ear"
+  tasks:
+    - name: Try downloading one EAR
+      get_url:
+        url: "{{ test_url }}"
+        dest: "/tmp/medicaid_EAR6.ear"
+        url_username: "{{ jenkins_user }}"
+        url_password: "{{ jenkins_token }}"
+        force_basic_auth: yes
+        mode: '0644'
