@@ -4,7 +4,7 @@
   become: yes
 
   vars:
-    jenkins_base_url: "jenkins_base_url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/job/eMMIS-DXCD/lastSuccessfulBuild/artifact"
+    jenkins_base_url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/job/eMMIS-DXCD/lastSuccessfulBuild/artifact"
     ear_files:
       - medicaid_EAR6.ear
       - medicaidSupplementsEAR.ear
@@ -30,6 +30,6 @@
 
     - name: Deploy each EAR inside Docker container using wsadmin
       command: >
-        docker exec {{ docker_container_name }}
-        {{ wsadmin_path }} -lang jython -f /opt/WAS/scripts/deploy_was_script.py {{ ear_dest_dir }}/{{ item }}
+        docker exec {{ docker_container_name }} {{ wsadmin_path }}
+        -lang jython -f /opt/WAS/scripts/deploy_was_script.py {{ ear_dest_dir }}/{{ item }}
       loop: "{{ ear_files }}"
