@@ -24,6 +24,7 @@
         url_password: "{{ jenkins_token }}"
         force_basic_auth: yes
         mode: '0644'
+
     - name: Deploy medicaid_EAR6.ear inside Docker container using wsadmin
       command: >
         docker exec emmis-t6 /opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin/wsadmin.sh
@@ -35,3 +36,5 @@
         docker exec emmis-t6 /opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin/wsadmin.sh
         -lang jython
         -f /opt/WAS/scripts/deploy_was_script.py /home/anandyala/medicaidSupplementsEAR.ear
+
+    
