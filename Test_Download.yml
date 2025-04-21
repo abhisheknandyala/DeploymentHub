@@ -1,5 +1,5 @@
 - name: Test downloading EAR file from Jenkins
-  hosts: localhost
+  hosts: 10.112.30.40
   vars:
     jenkins_user: your_user
     jenkins_token: your_token
