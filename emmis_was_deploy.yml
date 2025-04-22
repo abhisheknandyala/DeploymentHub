@@ -37,6 +37,8 @@
         docker exec emmis-t6
         /opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin/wsadmin.sh
         -lang jython
+        -user "{{was_user}}}"
+        -password "{{was_password}}"
         -f /home/anandyala/WAS/scripts/deploy_was_script.py
         {{ ear_dest_dir }}/medicaid_EAR6.ear
 
@@ -45,5 +47,7 @@
         docker exec emmis-t6
         /opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin/wsadmin.sh
         -lang jython
+        -user "{{was_user}}}"
+        -password "{{was_password}}"
         -f /home/anandyala/WAS/scripts/deploy_was_script.py
         {{ ear_dest_dir }}/medicaidSupplementsEAR.ear
