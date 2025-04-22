@@ -21,6 +21,9 @@
         mode: '0755'
         owner: anandyala
         group: anandyala
+    
+    - name: Copy deploy_was_script.py to container
+      command: docker cp /home/anandyala/WAS/scripts/deploy_was_script.py emmis-t6:/opt/WAS/scripts/deploy_was_script.py
 
     - name: Download EAR files from Jenkins
       get_url:
