@@ -22,14 +22,14 @@
         owner: anandyala
         group: anandyala
     
-      - name: Copy EAR Files to container
-      command: docker cp /home/anandyala/WAS/ear/medicaid_EAR6.ear emmis-t6:/opt/WAS/ear/medicaid_EAR6.ear
+    - name: Copy EAR Files to container
+        command: docker cp /home/anandyala/WAS/ear/medicaid_EAR6.ear emmis-t6:/opt/WAS/ear/medicaid_EAR6.ear
       
-      - name: Copy EAR Files to container
-      command: docker cp /home/anandyala/WAS/ear/medicaidSupplementsEAR.ear emmis-t6:/opt/WAS/ear/medicaidSupplementsEAR.ear
+    - name: Copy EAR Files to container
+        command: docker cp /home/anandyala/WAS/ear/medicaidSupplementsEAR.ear emmis-t6:/opt/WAS/ear/medicaidSupplementsEAR.ear
 
-      - name: Copy Deploy Script files to container
-      command: docker cp /home/anandyala/WAS/scripts/deploy_was_script.py emmis-t6:/opt/WAS/scripts/deploy_was_script.py
+    - name: Copy Deploy Script files to container
+        command: docker cp /home/anandyala/WAS/scripts/deploy_was_script.py emmis-t6:/opt/WAS/scripts/deploy_was_script.py
 
     - name: Download EAR files from Jenkins
       get_url:
