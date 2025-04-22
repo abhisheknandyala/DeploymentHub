@@ -41,15 +41,15 @@
         mode: '0644'
       loop: "{{ ear_downloads }}"
 
-    - name: Deploy medicaid_EAR6.ear inside Docker container using wsadmin
-      command: >
-        docker exec emmis-t6
-        /opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin/wsadmin.sh
-        -lang jython
-        -user {{ was_user }}
-        -password {{ was_password }}
-        -f /opt/WAS/scripts/deploy_was_script.py
-        {{ ear_dest_dir }}/medicaid_EAR6.ear
+    #- name: Deploy medicaid_EAR6.ear inside Docker container using wsadmin
+     # command: >
+      #  docker exec emmis-t6
+       # /opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin/wsadmin.sh
+        #-lang jython
+        #-user {{ was_user }}
+        #-password {{ was_password }}
+        #-f /opt/WAS/scripts/deploy_was_script.py
+        #{{ ear_dest_dir }}/medicaid_EAR6.ear
 
 
     - name: Deploy medicaidSupplementsEAR.ear inside Docker container using wsadmin
