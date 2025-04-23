@@ -47,7 +47,7 @@
         -lang jython
         -user {{ was_user }}
         -password {{ was_password }}
-        -f /opt/WAS/scripts/update_medicaid_app.py /opt/WAS/ear/medicaidSupplementsEAR.ear
+        -f /opt/WAS/scripts/update_medicaid_app.py /opt/WAS/ear/medicaid_EAR6.ear
 
 
     - name: Deploy medicaidSupplementsEAR.ear inside Docker using the script
