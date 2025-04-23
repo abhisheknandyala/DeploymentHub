@@ -40,15 +40,14 @@
     - name: Copy medicaidSupplementsEAR.ear to container
       command: docker cp {{ ear_dest_dir }}/medicaidSupplementsEAR.ear emmis-t6:/opt/WAS/ear/medicaidSupplementsEAR.ear
 
-    - name: Deploy medicaid_EAR6.ear inside Docker using its deploy script
-      command: >
-        docker exec emmis-t6
-        /opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin/wsadmin.sh
-        -lang jython
-        -user {{ was_user }}
-        -password {{ was_password }}
-        -f /opt/WAS/scripts/deploy_medicaid_app.py
-        /opt/WAS/ear/medicaid_EAR6.ear
+   # - name: Deploy medicaid_EAR6.ear inside Docker using its deploy script
+    #  command: >
+     #   docker exec emmis-t6 /opt/IBM/WebSphere/AppServer/profiles/AppSrv01_eMMIS/bin/wsadmin.sh \
+      #  -lang jython \
+       # -user wasadmin \
+        #-password wasadmintest \
+        #-f /opt/WAS/scripts/update_medicaid_app.py /opt/WAS/ear/medicaid.ear
+
 
     - name: Deploy medicaidSupplementsEAR.ear inside Docker using its deploy script
       command: >
@@ -57,5 +56,4 @@
         -lang jython
         -user {{ was_user }}
         -password {{ was_password }}
-        -f /opt/WAS/scripts/deploy_supplements_app.py
-        /opt/WAS/ear/medicaidSupplementsEAR.ear
+        -f /opt/WAS/scripts/update_medicaid_app.py /opt/WAS/ear/medicaidSupplementsEAR.ear
