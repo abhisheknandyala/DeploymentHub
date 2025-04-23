@@ -5,31 +5,24 @@
   vars:
     jenkins_user: "{{ jenkins_user }}"
     jenkins_token: "{{ jenkins_token }}"
+    was_user: "{{ was_user }}"
+    was_password: "{{ was_password }}"
     ear_dest_dir: "/home/anandyala/WAS/ear"
 
     ear_downloads:
-      - url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/job/eMMIS-DXCD/lastSuccessfulBuild/artifact/masterBuild/artifacts/medicaid_EAR6.ear"
+      - url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/view/eMMIS/job/eMMISJSF2Trunk/158/medicaid_EAR6.ear"
         dest: "{{ ear_dest_dir }}/medicaid_EAR6.ear"
-      - url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/job/eMMIS-DXCD/lastSuccessfulBuild/artifact/masterBuild/artifacts/medicaidSupplementsEAR.ear"
+      - url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/view/eMMIS/job/eMMISJSF2Trunk/158/medicaidSupplementsEAR.ear"
         dest: "{{ ear_dest_dir }}/medicaidSupplementsEAR.ear"
 
   tasks:
-    - name: Ensure destination directory exists
+    - name: Ensure EAR destination directory exists
       file:
         path: "{{ ear_dest_dir }}"
         state: directory
         mode: '0755'
         owner: anandyala
         group: anandyala
-    
-    - name: Copy EAR Files to container
-      command: docker cp /home/anandyala/WAS/ear/medicaid_EAR6.ear emmis-t6:/opt/WAS/ear/medicaid_EAR6.ear
-      
-    - name: Copy EAR Files to container
-      command: docker cp /home/anandyala/WAS/ear/medicaidSupplementsEAR.ear emmis-t6:/opt/WAS/ear/medicaidSupplementsEAR.ear
-
-    - name: Copy Deploy Script files to container
-      command: docker cp /home/anandyala/WAS/scripts/deploy_was_script.py emmis-t6:/opt/WAS/scripts/deploy_was_script.py
 
     - name: Download EAR files from Jenkins
       get_url:
@@ -41,23 +34,27 @@
         mode: '0644'
       loop: "{{ ear_downloads }}"
 
-    #- name: Deploy medicaid_EAR6.ear inside Docker container using wsadmin
-     # command: >
-      #  docker exec emmis-t6
-       # /opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin/wsadmin.sh
-        #-lang jython
-        #-user {{ was_user }}
-        #-password {{ was_password }}
-        #-f /opt/WAS/scripts/deploy_was_script.py
-        #{{ ear_dest_dir }}/medicaid_EAR6.ear
+    - name: Copy medicaid_EAR6.ear to container
+      command: docker cp {{ ear_dest_dir }}/medicaid_EAR6.ear emmis-t6:/opt/WAS/ear/medicaid_EAR6.ear
 
+    - name: Copy medicaidSupplementsEAR.ear to container
+      command: docker cp {{ ear_dest_dir }}/medicaidSupplementsEAR.ear emmis-t6:/opt/WAS/ear/medicaidSupplementsEAR.ear
 
-    - name: Deploy medicaidSupplementsEAR.ear inside Docker container using wsadmin
+    - name: Deploy medicaid_EAR6.ear inside Docker using the script
       command: >
         docker exec emmis-t6
         /opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin/wsadmin.sh
         -lang jython
-        -user "{{was_user}}}"
-        -password "{{was_password}}"
-        -f /opt/WAS/scripts/deploy_was_script.py
-        {{ ear_dest_dir }}/medicaidSupplementsEAR.ear
+        -user {{ was_user }}
+        -password {{ was_password }}
+        -f /opt/WAS/scripts/update_medicaid_app.py /opt/WAS/ear/medicaid_EAR6.ear
+
+
+    - name: Deploy medicaidSupplementsEAR.ear inside Docker using the script
+      command: >
+        docker exec emmis-t6
+        /opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin/wsadmin.sh
+        -lang jython
+        -user {{ was_user }}
+        -password {{ was_password }}
+        -f /opt/WAS/scripts/updatemedicaidSupplements_app.py /opt/WAS/ear/medicaidSupplementsEAR.ear
