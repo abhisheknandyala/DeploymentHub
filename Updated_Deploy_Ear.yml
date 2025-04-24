@@ -43,11 +43,11 @@
         mode: '0644'
       loop: "{{ ear_downloads }}"
 
-    - name: Touch EAR files to update timestamp (optional)
-      file:
-        path: "{{ item.dest }}"
-        state: touch
-      loop: "{{ ear_downloads }}"
+   # - name: Touch EAR files to update timestamp (optional)
+    #  file:
+     #   path: "{{ item.dest }}"
+      #  state: touch
+      #loop: "{{ ear_downloads }}"
 
    # - name: Ensure EAR and script directories exist inside container
     #  block:
