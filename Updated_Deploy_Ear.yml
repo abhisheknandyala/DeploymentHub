@@ -90,3 +90,6 @@
         -password {{ was_password }}
         -f {{ script_container_dir }}/updatemedicaidSupplements_app.py
         {{ ear_container_dir }}/medicaidSupplementsEAR.ear
+    - name: Restart IBM HTTP Server inside container
+      command: docker exec emmis-t6 /opt/IBM/HTTPServer/bin/apachectl restart
+
