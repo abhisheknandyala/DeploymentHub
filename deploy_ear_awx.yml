@@ -24,6 +24,12 @@
         mode: '0755'
         owner: anandyala
         group: anandyala
+    
+    - name: Clean up old EAR files before download
+      file:
+        path: "{{ item.dest }}"
+        state: absent
+      loop: "{{ ear_downloads }}"
 
     - name: Download EAR files from Jenkins
       get_url:
