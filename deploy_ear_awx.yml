@@ -8,6 +8,7 @@
     was_user: "{{ was_user }}"
     was_password: "{{ was_password }}"
     ear_dest_dir: "/home/anandyala/WAS/ear"
+    build_number: "{{ build_number }}"
 
     ear_downloads:
       - url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/job/eMMIS-DXCD/lastSuccessfulBuild/artifact/masterBuild/artifacts/medicaid_EAR6.ear"
