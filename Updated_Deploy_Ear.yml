@@ -30,7 +30,7 @@
         owner: anandyala
         group: anandyala
 
-    - name: Download EAR files from Jenkins (specific build)
+    - name: Download EAR files from Jenkins
       get_url:
         url: "{{ item.url }}"
         dest: "{{ item.dest }}"
@@ -43,35 +43,13 @@
         mode: '0644'
       loop: "{{ ear_downloads }}"
 
-   # - name: Touch EAR files to update timestamp (optional)
-    #  file:
-     #   path: "{{ item.dest }}"
-      #  state: touch
-      #loop: "{{ ear_downloads }}"
-
-   # - name: Ensure EAR and script directories exist inside container
-    #  block:
-     #   - name: Create EAR directory inside container
-      #    command: docker exec emmis-t6 mkdir -p {{ ear_container_dir }}
-
-       # - name: Create scripts directory inside container
-        #  command: docker exec emmis-t6 mkdir -p {{ script_container_dir }}
-
-    #- name: Remove old EARs inside container
-     # block:
-      #  - name: Remove old medicaid EAR
-       #   command: docker exec emmis-t6 rm -f {{ ear_container_dir }}/medicaid_EAR6.ear
-
-        #- name: Remove old medicaidSupplementsEAR EAR
-         # command: docker exec emmis-t6 rm -f {{ ear_container_dir }}/medicaidSupplementsEAR.ear
-
     - name: Copy medicaid_EAR6.ear to container
       command: docker cp {{ ear_dest_dir }}/medicaid_EAR6.ear emmis-t6:{{ ear_container_dir }}/medicaid_EAR6.ear
 
     - name: Copy medicaidSupplementsEAR.ear to container
       command: docker cp {{ ear_dest_dir }}/medicaidSupplementsEAR.ear emmis-t6:{{ ear_container_dir }}/medicaidSupplementsEAR.ear
 
-    - name: Deploy medicaid_EAR6.ear inside Docker using the script
+    - name: Deploy medicaid_EAR6.ear inside Docker using wsadmin
       command: >
         docker exec emmis-t6
         /opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin/wsadmin.sh
@@ -81,7 +59,7 @@
         -f {{ script_container_dir }}/update_medicaid_app.py
         {{ ear_container_dir }}/medicaid_EAR6.ear
 
-    - name: Deploy medicaidSupplementsEAR.ear inside Docker using the script
+    - name: Deploy medicaidSupplementsEAR.ear inside Docker using wsadmin
       command: >
         docker exec emmis-t6
         /opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin/wsadmin.sh
@@ -90,6 +68,6 @@
         -password {{ was_password }}
         -f {{ script_container_dir }}/updatemedicaidSupplements_app.py
         {{ ear_container_dir }}/medicaidSupplementsEAR.ear
+
     - name: Restart IBM HTTP Server inside container
       command: docker exec emmis-t6 /opt/IBM/HTTPServer/bin/apachectl restart
-
