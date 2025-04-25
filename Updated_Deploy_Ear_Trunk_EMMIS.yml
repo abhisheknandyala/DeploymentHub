@@ -3,7 +3,6 @@
   become: yes
 
   vars:
-    build_number:   
     jenkins_user: "{{ jenkins_user }}"
     jenkins_token: "{{ jenkins_token }}"
     was_user: "{{ was_user }}"
@@ -13,11 +12,9 @@
     script_container_dir: "/opt/WAS/scripts"
 
     ear_downloads:
-      - name: medicaid_EAR6.ear
-        url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/view/eMMIS/job/eMMISJSF2Trunk/{{ build_number }}/artifact/masterBuild/artifacts/medicaid_EAR6.ear"
+      - url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/view/eMMIS/job/eMMISJSF2Trunk/lastSuccessfulBuild/artifact/masterBuild/artifacts/medicaid_EAR6.ear"
         dest: "{{ ear_dest_dir }}/medicaid_EAR6.ear"
-      - name: medicaidSupplementsEAR.ear
-        url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/view/eMMIS/job/eMMISJSF2Trunk/{{ build_number }}/artifact/masterBuild/artifacts/medicaidSupplementsEAR.ear"
+      - url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/view/eMMIS/job/eMMISJSF2Trunk/lastSuccessfulBuild/artifact/masterBuild/artifacts/medicaidSupplementsEAR.ear"
         dest: "{{ ear_dest_dir }}/medicaidSupplementsEAR.ear"
 
   tasks:
@@ -30,7 +27,7 @@
         owner: anandyala
         group: anandyala
 
-    - name: Download EAR files from Jenkins (specific build)
+    - name: Download EAR files from Jenkins
       get_url:
         url: "{{ item.url }}"
         dest: "{{ item.dest }}"
@@ -38,15 +35,7 @@
         url_password: "{{ jenkins_token }}"
         force_basic_auth: yes
         force: yes
-        headers:
-          Cache-Control: "no-cache"
         mode: '0644'
-      loop: "{{ ear_downloads }}"
-
-    - name: Touch EAR files to update timestamp (optional)
-      file:
-        path: "{{ item.dest }}"
-        state: touch
       loop: "{{ ear_downloads }}"
 
     - name: Ensure EAR and script directories exist inside container
@@ -81,12 +70,20 @@
         -f {{ script_container_dir }}/update_medicaid_app.py
         {{ ear_container_dir }}/medicaid_EAR6.ear
 
-    - name: Deploy medicaidSupplementsEAR.ear inside Docker using the script
-      command: >
-        docker exec emmis-t6
-        /opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin/wsadmin.sh
-        -lang jython
-        -user {{ was_user }}
-        -password {{ was_password }}
-        -f {{ script_container_dir }}/updatemedicaidSupplements_app.py
-        {{ ear_container_dir }}/medicaidSupplementsEAR.ear
+   # - name: Deploy medicaidSupplementsEAR.ear inside Docker using the script
+   #   command: >
+   #     docker exec emmis-t6
+   #     /opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin/wsadmin.sh
+   #     -lang jython
+   #     -user {{ was_user }}
+   #     -password {{ was_password }}
+   #     -f {{ script_container_dir }}/updatemedicaidSupplements_app.py
+   #     {{ ear_container_dir }}/medicaidSupplementsEAR.ear
+
+   # - name: Check EAR timestamps inside container
+   #   command: docker exec emmis-t6 ls -l {{ ear_container_dir }}
+   #   register: ear_listing
+
+   # - name: Show EAR timestamps for verification
+   #   debug:
+   #     var: ear_listing.stdout_lines
