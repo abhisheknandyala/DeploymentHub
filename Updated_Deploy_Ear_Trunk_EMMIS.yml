@@ -70,20 +70,13 @@
         -f {{ script_container_dir }}/update_medicaid_app.py
         {{ ear_container_dir }}/medicaid_EAR6.ear
 
-   # - name: Deploy medicaidSupplementsEAR.ear inside Docker using the script
-   #   command: >
-   #     docker exec emmis-t6
-   #     /opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin/wsadmin.sh
-   #     -lang jython
-   #     -user {{ was_user }}
-   #     -password {{ was_password }}
-   #     -f {{ script_container_dir }}/updatemedicaidSupplements_app.py
-   #     {{ ear_container_dir }}/medicaidSupplementsEAR.ear
+    - name: Deploy medicaidSupplementsEAR.ear inside Docker using the script
+      command: >
+        docker exec emmis-t6
+        /opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin/wsadmin.sh
+        -lang jython
+        -user {{ was_user }}
+        -password {{ was_password }}
+        -f {{ script_container_dir }}/updatemedicaidSupplements_app.py
+        {{ ear_container_dir }}/medicaidSupplementsEAR.ear
 
-   # - name: Check EAR timestamps inside container
-   #   command: docker exec emmis-t6 ls -l {{ ear_container_dir }}
-   #   register: ear_listing
-
-   # - name: Show EAR timestamps for verification
-   #   debug:
-   #     var: ear_listing.stdout_lines
