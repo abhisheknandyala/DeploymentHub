@@ -7,7 +7,7 @@
     jenkins_token: "{{ jenkins_token }}"
     was_user: "{{ was_user }}"
     was_password: "{{ was_password }}"
-    ear_dest_dir: "/home/anandyala/WAS/ear"
+    ear_dest_dir: "/home/anandyala/WAS/DockerTS/ear"
     ear_container_dir: "/opt/WAS/ear"
     script_container_dir: "/opt/WAS/scripts"
 
