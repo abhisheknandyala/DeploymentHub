@@ -3,16 +3,31 @@
   vars:
     jenkins_user: "{{ jenkins_user }}"
     jenkins_token: "{{ jenkins_token }}"
-    #test_url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/job/eMMIS-DXCD/lastSuccessfulBuild/"
-    test_url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/view/eMMIS/job/eMMIS_Apr_June_Release/lastSuccessfulBuild/"
-    test_url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/view/eMMIS/job/eMMIS_Apr_June_Release/lastSuccessfulBuild/
+    ear_dest_dir: "/tmp/WAS/ear"
+
+    ear_downloads:
+      - url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/view/eMMIS/job/eMMIS_Apr_June_Release/lastSuccessfulBuild/artifact/masterBuild/artifacts/medicaid_EAR6.ear"
+        dest: "{{ ear_dest_dir }}/medicaid_EAR6.ear"
+      - url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/view/eMMIS/job/eMMIS_Apr_June_Release/lastSuccessfulBuild/artifact/masterBuild/artifacts/medicaidSupplementsEAR.ear"
+        dest: "{{ ear_dest_dir }}/medicaidSupplementsEAR.ear"
+  
   tasks:
-    - name: Try downloading one EAR
+
+    - name: Ensure EAR destination directory exists on host
+      file:
+        path: "{{ ear_dest_dir }}"
+        state: directory
+        mode: '0755'
+        owner: anandyala
+        group: anandyala
+
+    - name: Download EAR files from Jenkins
       get_url:
-        url: "{{ test_url }}"
-        dest: "/tmp/WAS/ear/medicaid_EAR6.ear"
-        dest: "/tmp/WAS/ear/medicaidSupplementsEAR.ear"
+        url: "{{ item.url }}"
+        dest: "{{ item.dest }}"
         url_username: "{{ jenkins_user }}"
         url_password: "{{ jenkins_token }}"
         force_basic_auth: yes
+        force: yes
         mode: '0644'
+      loop: "{{ ear_downloads }}"
