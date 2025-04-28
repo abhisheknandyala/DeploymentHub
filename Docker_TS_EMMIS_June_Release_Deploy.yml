@@ -41,28 +41,28 @@
     - name: Ensure EAR and script directories exist inside container
       block:
         - name: Create EAR directory inside container
-          command: docker exec emmis-t6 mkdir -p {{ ear_container_dir }}
+          command: docker exec emmis-ts mkdir -p {{ ear_container_dir }}
 
         - name: Create scripts directory inside container
-          command: docker exec emmis-t6 mkdir -p {{ script_container_dir }}
+          command: docker exec emmis-ts mkdir -p {{ script_container_dir }}
 
     - name: Remove old EARs inside container
       block:
         - name: Remove old medicaid EAR
-          command: docker exec emmis-t6 rm -f {{ ear_container_dir }}/medicaid_EAR6.ear
+          command: docker exec emmis-ts rm -f {{ ear_container_dir }}/medicaid_EAR6.ear
 
         - name: Remove old medicaidSupplementsEAR EAR
-          command: docker exec emmis-t6 rm -f {{ ear_container_dir }}/medicaidSupplementsEAR.ear
+          command: docker exec emmis-ts rm -f {{ ear_container_dir }}/medicaidSupplementsEAR.ear
 
     - name: Copy medicaid_EAR6.ear to container
-      command: docker cp {{ ear_dest_dir }}/medicaid_EAR6.ear emmis-t6:{{ ear_container_dir }}/medicaid_EAR6.ear
+      command: docker cp {{ ear_dest_dir }}/medicaid_EAR6.ear emmis-ts:{{ ear_container_dir }}/medicaid_EAR6.ear
 
     - name: Copy medicaidSupplementsEAR.ear to container
-      command: docker cp {{ ear_dest_dir }}/medicaidSupplementsEAR.ear emmis-t6:{{ ear_container_dir }}/medicaidSupplementsEAR.ear
+      command: docker cp {{ ear_dest_dir }}/medicaidSupplementsEAR.ear emmis-ts:{{ ear_container_dir }}/medicaidSupplementsEAR.ear
 
     - name: Deploy medicaid_EAR6.ear inside Docker using the script
       command: >
-        docker exec emmis-t6
+        docker exec emmis-ts
         /opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin/wsadmin.sh
         -lang jython
         -user {{ was_user }}
@@ -72,7 +72,7 @@
 
     - name: Deploy medicaidSupplementsEAR.ear inside Docker using the script
       command: >
-        docker exec emmis-t6
+        docker exec emmis-ts
         /opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin/wsadmin.sh
         -lang jython
         -user {{ was_user }}
