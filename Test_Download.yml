@@ -1,8 +1,8 @@
 - name: Test downloading EAR file from Jenkins
   hosts: 10.112.30.40
   vars:
-    jenkins_user: your_user
-    jenkins_token: your_token
+    jenkins_user: "{{ jenkins_user }}"
+    jenkins_token: "{{ jenkins_token }}"
     #test_url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/job/eMMIS-DXCD/lastSuccessfulBuild/"
     test_url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/view/eMMIS/job/eMMIS_Apr_June_Release/lastSuccessfulBuild/"
     test_url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/view/eMMIS/job/eMMIS_Apr_June_Release/lastSuccessfulBuild/
