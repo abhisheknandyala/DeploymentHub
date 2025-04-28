@@ -1,0 +1,100 @@
+- name: Download and Deploy EARs to WebSphere
+  hosts: 10.112.30.40
+  become: yes
+
+  vars:
+    container_name: ""  # Will be entered at Launch
+    jenkins_user: "{{ jenkins_user }}"  # From Credential
+    jenkins_token: "{{ jenkins_token }}"  # From Credential
+    jenkins_base_url: ""  # Jenkins Base URL parameter at Launch
+    jenkins_build_number: ""  # Jenkins Build Number parameter at Launch
+    was_user: "{{ was_user }}"
+    was_password: "{{ was_password }}"
+    ear_dest_dir: "/home/anandyala/WAS/DockerTS/ear"
+    ear_container_dir: "/opt/WAS/ear"
+    script_container_dir: "/opt/WAS/scripts"
+    update_scripts_dir: "/home/anandyala/WAS/DockerTS/scripts"
+
+    ear_downloads:
+      - url: "{{ jenkins_base_url }}/artifact/masterBuild/artifacts/medicaid_EAR6.ear"
+        dest: "{{ ear_dest_dir }}/medicaid_EAR6.ear"
+      - url: "{{ jenkins_base_url }}/artifact/masterBuild/artifacts/medicaidSupplementsEAR.ear"
+        dest: "{{ ear_dest_dir }}/medicaidSupplementsEAR.ear"
+
+  tasks:
+
+    - name: Fail if required variables are missing
+      fail:
+        msg: "ERROR: container_name, jenkins_base_url, and jenkins_build_number must be provided!"
+      when: container_name == "" or jenkins_base_url == "" or jenkins_build_number == ""
+
+    - name: Ensure EAR destination directory exists on host
+      file:
+        path: "{{ ear_dest_dir }}"
+        state: directory
+        mode: '0755'
+        owner: anandyala
+        group: anandyala
+
+    - name: Download EAR files from Jenkins
+      get_url:
+        url: "{{ item.url | replace('BUILD_NUMBER', jenkins_build_number) }}"
+        dest: "{{ item.dest }}"
+        url_username: "{{ jenkins_user }}"
+        url_password: "{{ jenkins_token }}"
+        force_basic_auth: yes
+        force: yes
+        mode: '0644'
+      loop: "{{ ear_downloads }}"
+
+    - name: Ensure EAR and script directories exist inside container
+      block:
+        - name: Create EAR directory inside container
+          command: docker exec {{ container_name }} mkdir -p {{ ear_container_dir }}
+
+        - name: Create scripts directory inside container
+          command: docker exec {{ container_name }} mkdir -p {{ script_container_dir }}
+
+    - name: Remove old EARs inside container
+      block:
+        - name: Remove old medicaid EAR
+          command: docker exec {{ container_name }} rm -f {{ ear_container_dir }}/medicaid_EAR6.ear
+
+        - name: Remove old medicaidSupplementsEAR EAR
+          command: docker exec {{ container_name }} rm -f {{ ear_container_dir }}/medicaidSupplementsEAR.ear
+
+    - name: Copy EARs and scripts into container
+      block:
+        - name: Copy medicaid_EAR6.ear to container
+          command: docker cp {{ ear_dest_dir }}/medicaid_EAR6.ear {{ container_name }}:{{ ear_container_dir }}/medicaid_EAR6.ear
+
+        - name: Copy medicaidSupplementsEAR.ear to container
+          command: docker cp {{ ear_dest_dir }}/medicaidSupplementsEAR.ear {{ container_name }}:{{ ear_container_dir }}/medicaidSupplementsEAR.ear
+
+        - name: Copy update_medicaid_app.py script
+          command: docker cp {{ update_scripts_dir }}/update_medicaid_app.py {{ container_name }}:{{ script_container_dir }}/update_medicaid_app.py
+
+        - name: Copy updatemedicaidSupplements_app.py script
+          command: docker cp {{ update_scripts_dir }}/updatemedicaidSupplements_app.py {{ container_name }}:{{ script_container_dir }}/updatemedicaidSupplements_app.py
+
+    - name: Deploy EARs inside Docker using wsadmin.sh
+      block:
+        - name: Deploy medicaid_EAR6.ear
+          command: >
+            docker exec {{ container_name }}
+            /opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin/wsadmin.sh
+            -lang jython
+            -user {{ was_user }}
+            -password {{ was_password }}
+            -f {{ script_container_dir }}/update_medicaid_app.py
+            {{ ear_container_dir }}/medicaid_EAR6.ear
+
+        - name: Deploy medicaidSupplementsEAR.ear
+          command: >
+            docker exec {{ container_name }}
+            /opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin/wsadmin.sh
+            -lang jython
+            -user {{ was_user }}
+            -password {{ was_password }}
+            -f {{ script_container_dir }}/updatemedicaidSupplements_app.py
+            {{ ear_container_dir }}/medicaidSupplementsEAR.ear
