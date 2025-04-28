@@ -3,6 +3,7 @@
   become: yes
 
   vars:
+    container_name: ""  #Container name will be entered at AWX Launch time
     jenkins_user: "{{ jenkins_user }}"
     jenkins_token: "{{ jenkins_token }}"
     was_user: "{{ was_user }}"
@@ -10,6 +11,7 @@
     ear_dest_dir: "/home/anandyala/WAS/DockerTS/ear"
     ear_container_dir: "/opt/WAS/ear"
     script_container_dir: "/opt/WAS/scripts"
+    update_scripts_dir: "/home/anandyala/WAS/DockerTS/scripts"
 
     ear_downloads:
       - url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/view/eMMIS/job/eMMIS_Apr_June_Release/lastSuccessfulBuild/artifact/masterBuild/artifacts/medicaid_EAR6.ear"
@@ -18,6 +20,11 @@
         dest: "{{ ear_dest_dir }}/medicaidSupplementsEAR.ear"
 
   tasks:
+
+    - name: Fail if container_name is not provided
+      fail:
+        msg: "ERROR: Container name must be provided at launch!"
+      when: container_name == ""
 
     - name: Ensure EAR destination directory exists on host
       file:
@@ -41,28 +48,34 @@
     - name: Ensure EAR and script directories exist inside container
       block:
         - name: Create EAR directory inside container
-          command: docker exec emmis-ts mkdir -p {{ ear_container_dir }}
+          command: docker exec {{ container_name }} mkdir -p {{ ear_container_dir }}
 
         - name: Create scripts directory inside container
-          command: docker exec emmis-ts mkdir -p {{ script_container_dir }}
+          command: docker exec {{ container_name }} mkdir -p {{ script_container_dir }}
 
     - name: Remove old EARs inside container
       block:
         - name: Remove old medicaid EAR
-          command: docker exec emmis-ts rm -f {{ ear_container_dir }}/medicaid_EAR6.ear
+          command: docker exec {{ container_name }} rm -f {{ ear_container_dir }}/medicaid_EAR6.ear
 
         - name: Remove old medicaidSupplementsEAR EAR
-          command: docker exec emmis-ts rm -f {{ ear_container_dir }}/medicaidSupplementsEAR.ear
+          command: docker exec {{ container_name }} rm -f {{ ear_container_dir }}/medicaidSupplementsEAR.ear
 
     - name: Copy medicaid_EAR6.ear to container
-      command: docker cp {{ ear_dest_dir }}/medicaid_EAR6.ear emmis-ts:{{ ear_container_dir }}/medicaid_EAR6.ear
+      command: docker cp {{ ear_dest_dir }}/medicaid_EAR6.ear {{ container_name }}:{{ ear_container_dir }}/medicaid_EAR6.ear
 
     - name: Copy medicaidSupplementsEAR.ear to container
-      command: docker cp {{ ear_dest_dir }}/medicaidSupplementsEAR.ear emmis-ts:{{ ear_container_dir }}/medicaidSupplementsEAR.ear
+      command: docker cp {{ ear_dest_dir }}/medicaidSupplementsEAR.ear {{ container_name }}:{{ ear_container_dir }}/medicaidSupplementsEAR.ear
+
+    - name: Copy update_medicaid_app.py script to container
+      command: docker cp {{ update_scripts_dir }}/update_medicaid_app.py {{ container_name }}:{{ script_container_dir }}/update_medicaid_app.py
+
+    - name: Copy updatemedicaidSupplements_app.py script to container
+      command: docker cp {{ update_scripts_dir }}/updatemedicaidSupplements_app.py {{ container_name }}:{{ script_container_dir }}/updatemedicaidSupplements_app.py
 
     - name: Deploy medicaid_EAR6.ear inside Docker using the script
       command: >
-        docker exec emmis-ts
+        docker exec {{ container_name }}
         /opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin/wsadmin.sh
         -lang jython
         -user {{ was_user }}
@@ -72,11 +85,10 @@
 
     - name: Deploy medicaidSupplementsEAR.ear inside Docker using the script
       command: >
-        docker exec emmis-ts
+        docker exec {{ container_name }}
         /opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin/wsadmin.sh
         -lang jython
         -user {{ was_user }}
         -password {{ was_password }}
         -f {{ script_container_dir }}/updatemedicaidSupplements_app.py
         {{ ear_container_dir }}/medicaidSupplementsEAR.ear
-
