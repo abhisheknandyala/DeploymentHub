@@ -1,119 +1,102 @@
-- name: Download and Deploy EARs to WebSphere
+- name: Download and Deploy EARs to WebSphere and WebSphere Portal
   hosts: 10.112.30.40
   become: yes
 
   vars:
-    container_name: ""  #Container name will be entered at AWX Launch time
+    jenkins_base_url: ""   # Prompted at launch
+    jenkins_build_number: ""  # Prompted at launch
+    container_name: ""  # Prompted at launch
+
     jenkins_user: "{{ jenkins_user }}"
     jenkins_token: "{{ jenkins_token }}"
-    was_user: "{{ was_user }}"
+
+    was_user: "{{ was_user }}"     # WAS credentials
     was_password: "{{ was_password }}"
+    wps_user: "{{ wps_user }}"     # WPS credentials
+    wps_password: "{{ wps_password }}"
+
     ear_dest_dir: "/home/anandyala/WAS/Emomed/ear"
     ear_container_dir: "/opt/WAS/ear"
     script_container_dir: "/opt/WAS/scripts"
-    update_scripts_dir: "/home/anandyala/WAS/Emomed/scripts"
+    deploy_script_path: "/opt/WAS/scripts/Emomed_Update_ear.py"
 
-    ear_downloads:
-      - url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/view/eMOMED/job/eMomed_June_Release/lastSuccessfulBuild/artifact/masterBuild/artifacts/CommonAdminUtilsEAR.ear"
-        dest: "{{ ear_dest_dir }}/CommonAdminUtilsEAR.ear"
-      - url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/view/eMOMED/job/eMomed_June_Release/lastSuccessfulBuild/artifact/masterBuild/artifacts/EmomedPortalEAR.ear"
-        dest: "{{ ear_dest_dir }}/EmomedPortalEAR.ear"
-      - url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/view/eMOMED/job/eMomed_June_Release/lastSuccessfulBuild/artifact/masterBuild/artifacts/EmomedWasEAR.ear"
-        dest: "{{ ear_dest_dir }}/EmomedWasEAR.ear"
-      - url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/view/eMOMED/job/eMomed_June_Release/lastSuccessfulBuild/artifact/masterBuild/artifacts/medicaidSupplementsEAR.ear"
-        dest: "{{ ear_dest_dir }}/HCPCVaadinEAR.ear"
-      - url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/view/eMOMED/job/eMomed_June_Release/lastSuccessfulBuild/artifact/masterBuild/artifacts/HCPCVaadinEAR.ear"
-        dest: "{{ ear_dest_dir }}/MessageDrivenEJBEAR.ear"
-      
+    ear_mappings:
+      - { ear_file: "EmomedWasEAR.ear", app_name: "EmomedWasEAR", server_type: "was" }
+      - { ear_file: "MessageDrivenEJBEAR.ear", app_name: "MessageDrivenEJBEAR", server_type: "was" }
+      - { ear_file: "CommonAdminUtilsEAR.ear", app_name: "CommonAdminUtilsEAR", server_type: "wps" }
+      - { ear_file: "EmomedPortalEAR.ear", app_name: "EmomedPortalEAR", server_type: "wps" }
+      - { ear_file: "HCPCVaadinEAR.ear", app_name: "HCPCVaadinEAR", server_type: "wps" }
+
+    was_profile_wsadmin: "/opt/IBM/WebSphere/AppServer/profiles/AppSrv01/bin/wsadmin.sh"
+    wps_profile_wsadmin: "/opt/HCL/wp_profile/bin/wsadmin.sh"
 
   tasks:
 
-    - name: Fail if container_name is not provided
+    - name: Fail if critical values are not provided
       fail:
-        msg: "ERROR: Container name must be provided at launch!"
-      when: container_name == ""
+        msg: "ERROR: container_name, jenkins_base_url, build number, or credentials are missing!"
+      when: container_name == "" or jenkins_base_url == "" or jenkins_build_number == "" or was_user == "" or was_password == "" or wps_user == "" or wps_password == ""
 
-    - name: Ensure EAR destination directory exists on host
+    - name: Ensure EAR destination directory exists
       file:
         path: "{{ ear_dest_dir }}"
         state: directory
-        mode: '0755'
         owner: anandyala
         group: anandyala
+        mode: '0755'
 
-    - name: Download EAR files from Jenkins
+    - name: Download all EARs from Jenkins
       get_url:
-        url: "{{ item.url }}"
-        dest: "{{ item.dest }}"
+        url: "{{ jenkins_base_url }}/{{ jenkins_build_number }}/artifact/masterBuild/artifacts/{{ item.ear_file }}"
+        dest: "{{ ear_dest_dir }}/{{ item.ear_file }}"
         url_username: "{{ jenkins_user }}"
         url_password: "{{ jenkins_token }}"
         force_basic_auth: yes
         force: yes
         mode: '0644'
-      loop: "{{ ear_downloads }}"
+      loop: "{{ ear_mappings }}"
 
-    - name: Ensure EAR and script directories exist inside container
+    - name: Create EAR and scripts directories inside container
       block:
-        - name: Create EAR directory inside container
+        - name: Create EAR directory
           command: docker exec {{ container_name }} mkdir -p {{ ear_container_dir }}
 
-        - name: Create scripts directory inside container
+        - name: Create scripts directory
           command: docker exec {{ container_name }} mkdir -p {{ script_container_dir }}
 
+    - name: Copy Emomed_Update_ear.py script to container
+      command: docker cp {{ deploy_script_path }} {{ container_name }}:{{ script_container_dir }}/Emomed_Update_ear.py
+
     - name: Remove old EARs inside container
-      block:
-        - name: Remove old medicaid EAR
-          command: docker exec {{ container_name }} rm -f {{ ear_container_dir }}/CommonAdminUtilsEAR.ear
+      loop: "{{ ear_mappings }}"
+      loop_control:
+        loop_var: ear
+      command: docker exec {{ container_name }} rm -f {{ ear_container_dir }}/{{ ear.ear_file }}
 
-        - name: Remove old medicaidSupplementsEAR EAR
-          command: docker exec {{ container_name }} rm -f {{ ear_container_dir }}/EmomedPortalEAR.ear
-        
-        - name: Remove old medicaidSupplementsEAR EAR
-          command: docker exec {{ container_name }} rm -f {{ ear_container_dir }}/EmomedWasEAR.ear
+    - name: Copy EARs into container
+      loop: "{{ ear_mappings }}"
+      loop_control:
+        loop_var: ear
+      command: docker cp {{ ear_dest_dir }}/{{ ear.ear_file }} {{ container_name }}:{{ ear_container_dir }}/{{ ear.ear_file }}
 
-        - name: Remove old medicaidSupplementsEAR EAR
-          command: docker exec {{ container_name }} rm -f {{ ear_container_dir }}/HCPCVaadinEAR.ear
-
-        - name: Remove old medicaidSupplementsEAR EAR
-          command: docker exec {{ container_name }} rm -f {{ ear_container_dir }}/MessageDrivenEJBEAR.ear
-
-    - name: Copy CommonAdminUtilsEAR.ear to container
-      command: docker cp {{ ear_dest_dir }}/CommonAdminUtilsEAR.ear {{ container_name }}:{{ ear_container_dir }}/medicaid_EAR6.ear
-
-    - name: Copy EmomedPortalEAR.ear to container
-      command: docker cp {{ ear_dest_dir }}/EmomedPortalEAR.earmedicaidSupplementsEAR.ear {{ container_name }}:{{ ear_container_dir }}/medicaidSupplementsEAR.ear
-
-    - name: Copy EmomedWasEAR.ear to container
-      command: docker cp {{ ear_dest_dir }}/EmomedWasEAR.ear {{ container_name }}:{{ ear_container_dir }}/medicaid_EAR6.ear
-
-    - name: Copy EmomedPortalEAR.ear to container
-      command: docker cp {{ ear_dest_dir }}/HCPCVaadinEAR.ear {{ container_name }}:{{ ear_container_dir }}/medicaidSupplementsEAR.ear
-    
-    - name: Copy EmomedPortalEAR.ear to container
-      command: docker cp {{ ear_dest_dir }}/MessageDrivenEJBEAR.ear {{ container_name }}:{{ ear_container_dir }}/medicaidSupplementsEAR.ear
-
-    - name: Copy update_medicaid_app.py script to container
-      command: docker cp {{ update_scripts_dir }}/update_medicaid_app.py {{ container_name }}:{{ script_container_dir }}/update_medicaid_app.py
-
-    - name: Copy updatemedicaidSupplements_app.py script to container
-      command: docker cp {{ update_scripts_dir }}/updatemedicaidSupplements_app.py {{ container_name }}:{{ script_container_dir }}/updatemedicaidSupplements_app.py
-
-    - name: Deploy medicaid_EAR6.ear inside Docker using the script
+    - name: Deploy EARs inside container
+      loop: "{{ ear_mappings }}"
+      loop_control:
+        loop_var: ear
       command: >
         docker exec {{ container_name }}
-        /opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin/wsadmin.sh
+        {{
+          (ear.server_type == 'was') | ternary(was_profile_wsadmin, wps_profile_wsadmin)
+        }}
         -lang jython
-        -user {{ was_user }}
-        -password {{ was_password }}
-        -f {{ script_container_dir }}/update_medicaid_app.py
-        {{ ear_container_dir }}/medicaid_EAR6.ear
-
-    - name: Deploy medicaidSupplementsEAR.ear inside Docker using the script
-      command: >
-        docker exec {{ container_name }}
-        /opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin/wsadmin.sh
-        -lang jython
-        -user {{ was_user }}
-        -password {{ was_password }}
-        -f {{ script_container_dir }}/updatemedicaidSupplements_app.py
-        {{ ear_container_dir }}/medicaidSupplementsEAR.ear
+        -user {{
+          (ear.server_type == 'was') | ternary(was_user, wps_user)
+        }}
+        -password {{
+          (ear.server_type == 'was') | ternary(was_password, wps_password)
+        }}
+        -f {{ script_container_dir }}/Emomed_Update_ear.py
+        {{ ear_container_dir }}/{{ ear.ear_file }}
+        {{ ear.app_name }}
+      args:
+        executable: /bin/bash
