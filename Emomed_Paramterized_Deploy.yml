@@ -18,7 +18,7 @@
     ear_dest_dir: "/home/anandyala/WAS/Emomed/ear"
     ear_container_dir: "/opt/WAS/ear"
     script_container_dir: "/opt/WAS/scripts"
-    deploy_script_path: "/opt/WAS/scripts/Emomed_Update_ear.py"
+    deploy_script_path: "/home/anandyala/WAS/Emomed/scripts/Emomed_Update_ear.py"
 
     ear_mappings:
       - { ear_file: "EmomedWasEAR.ear", app_name: "EmomedWasEAR", server_type: "was" }
