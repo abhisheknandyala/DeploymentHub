@@ -16,6 +16,7 @@
     wps_password: "{{ wps_password }}"
 
     ear_dest_dir: "/home/anandyala/WAS/Emomed/ear"
+    update_scripts_dir: "/home/anandyala/WAS/Emomed/scripts"
     ear_container_dir: "/opt/WAS/ear"
     script_container_dir: "/opt/WAS/scripts"
     deploy_script_path: "/home/anandyala/WAS/Emomed/scripts/Emomed_Update_ear.py"
@@ -44,6 +45,15 @@
         owner: anandyala
         group: anandyala
         mode: '0755'
+
+    - name: Ensure update_scripts_dir exists on host
+      file:
+        path: "{{ update_scripts_dir }}"
+        state: directory
+        owner: anandyala
+        group: anandyala
+        mode: '0755'
+
 
     - name: Download all EARs from Jenkins
       get_url:
