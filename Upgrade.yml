@@ -1,0 +1,95 @@
+- name: Backup and Upgrade Java, WAS, WPS, IHS in a Single Docker Container
+  hosts: "{{ target_host }}"
+  become: yes
+
+  vars:
+    # Provided at launch
+    container_name: ""              # e.g. emmis_all_in_one
+    java_installer_path: ""         # e.g. /opt/installers/jdk_installer.bin (inside container)
+    java_target_dir: ""             # e.g. /opt/IBM/Java
+    java_version: ""                # e.g. 11
+
+    was_install_dir: ""             # e.g. /opt/IBM/WebSphere
+    was_profile_dir: ""             # e.g. /opt/IBM/WebSphere/AppServer/profiles
+    wps_install_dir: ""             # e.g. /opt/IBM/WebSphere/PortalServer
+    wps_profile_dir: ""             # e.g. /opt/IBM/WebSphere/PortalServer/profiles
+    ihs_install_dir: ""             # e.g. /opt/IBM/HTTPServer
+
+    backup_dir: "/backup/{{ inventory_hostname }}/{{ ansible_date_time.date }}"
+
+  tasks:
+    - name: Create backup directory on Docker host
+      file:
+        path: "{{ backup_dir }}"
+        state: directory
+
+    # === BACKUPS FROM INSIDE SINGLE CONTAINER ===
+    - name: Backup WAS profiles
+      shell: |
+        docker exec {{ container_name }} tar czf /tmp/was_profiles.tar.gz {{ was_profile_dir }}
+        docker cp {{ container_name }}:/tmp/was_profiles.tar.gz {{ backup_dir }}/was_profiles.tar.gz
+
+    - name: Backup WAS config (backupConfig.sh)
+      shell: |
+        docker exec {{ container_name }} {{ was_install_dir }}/AppServer/bin/backupConfig.sh /tmp/was_config_backup.zip
+        docker cp {{ container_name }}:/tmp/was_config_backup.zip {{ backup_dir }}/was_config_backup.zip
+
+    - name: Backup WPS profiles
+      shell: |
+        docker exec {{ container_name }} tar czf /tmp/wps_profiles.tar.gz {{ wps_profile_dir }}
+        docker cp {{ container_name }}:/tmp/wps_profiles.tar.gz {{ backup_dir }}/wps_profiles.tar.gz
+
+    - name: Backup WPS config (backupConfig.sh)
+      shell: |
+        docker exec {{ container_name }} {{ wps_install_dir }}/bin/backupConfig.sh /tmp/wps_config_backup.zip
+        docker cp {{ container_name }}:/tmp/wps_config_backup.zip {{ backup_dir }}/wps_config_backup.zip
+
+    - name: Backup IHS installation
+      shell: |
+        docker exec {{ container_name }} tar czf /tmp/ihs_backup.tar.gz {{ ihs_install_dir }}
+        docker cp {{ container_name }}:/tmp/ihs_backup.tar.gz {{ backup_dir }}/ihs_backup.tar.gz
+
+    - name: Backup Java SDK
+      shell: |
+        docker exec {{ container_name }} tar czf /tmp/java_sdk_backup.tar.gz {{ java_target_dir }}
+        docker cp {{ container_name }}:/tmp/java_sdk_backup.tar.gz {{ backup_dir }}/java_sdk_backup.tar.gz
+
+    # === JAVA UPGRADE ===
+    - name: Install Java {{ java_version }} inside container
+      shell: >
+        docker exec {{ container_name }} {{ java_installer_path }} -i silent -DUSER_INSTALL_DIR={{ java_target_dir }}/jdk{{ java_version }}
+      args:
+        creates: "{{ java_target_dir }}/jdk{{ java_version }}/bin/java"
+
+    - name: Set JAVA_HOME inside container
+      shell: |
+        docker exec {{ container_name }} sh -c "echo 'export JAVA_HOME={{ java_target_dir }}/jdk{{ java_version }}' >> /etc/profile"
+        docker exec {{ container_name }} sh -c "echo 'export PATH=$JAVA_HOME/bin:$PATH' >> /etc/profile"
+
+    
+    - name: Upgrade WebSphere Application Server inside container
+      shell: >
+        docker exec {{ container_name }} /opt/IBM/InstallationManager/eclipse/tools/imcl install com.ibm.websphere.ND.v90
+        -repositories /opt/installers/WAS_repo
+        -installationDirectory {{ was_install_dir }}/AppServer
+        -acceptLicense
+        -log /tmp/was_upgrade_log.xml
+
+
+    - name: Upgrade WebSphere Portal Server inside container
+      shell: >
+        docker exec {{ container_name }} /opt/IBM/InstallationManager/eclipse/tools/imcl install com.ibm.websphere.PORTAL.v90
+        -repositories /opt/installers/WPS_repo
+        -installationDirectory {{ wps_install_dir }}
+        -acceptLicense
+        -log /tmp/wps_upgrade_log.xml
+
+
+    - name: Upgrade IBM HTTP Server inside container
+      shell: >
+        docker exec {{ container_name }} /opt/IBM/InstallationManager/eclipse/tools/imcl install com.ibm.websphere.IHS.v90
+        -repositories /opt/installers/IHS_repo
+        -installationDirectory {{ ihs_install_dir }}
+        -acceptLicense
+        -log /tmp/ihs_upgrade_log.xml
+
