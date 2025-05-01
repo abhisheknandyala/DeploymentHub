@@ -37,9 +37,9 @@
         docker cp {{ container_name }}:/tmp/ihs_backup.tar.gz {{ backup_dir }}/ihs_backup.tar.gz
 
     # === WAS Upgrade ===
-    - name: Upgrade WebSphere Application Server inside container (as was)
+    - name: Upgrade WebSphere Application Server inside container
       shell: >
-        docker exec --user was {{ container_name }} /opt/IBM/InstallationManager/eclipse/tools/imcl install com.ibm.websphere.ND.v90
+        docker exec --user was {{ container_name }} /opt/IBM/InstallationManager/eclipse/tools/imcl install {{ was_feature_id }}
         -repositories {{ was_repo_path }}
         -installationDirectory {{ was_install_dir }}/AppServer
         -acceptLicense
@@ -48,7 +48,7 @@
     # === IHS Upgrade ===
     - name: Upgrade IBM HTTP Server inside container (as was)
       shell: >
-        docker exec --user was {{ container_name }} /opt/IBM/InstallationManager/eclipse/tools/imcl install com.ibm.websphere.IHS.v90
+        docker exec --user was {{ container_name }} /opt/IBM/InstallationManager/eclipse/tools/imcl install {{ ihs_feature_id }}
         -repositories {{ ihs_repo_path }}
         -installationDirectory {{ ihs_install_dir }}
         -acceptLicense
