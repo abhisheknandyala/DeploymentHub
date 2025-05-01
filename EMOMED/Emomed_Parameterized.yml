@@ -1,0 +1,113 @@
+- name: Download and Deploy EARs to WebSphere and WebSphere Portal
+  hosts: all
+  become: yes
+
+  vars:
+    container_name: ""               # Prompted at launch
+    jenkins_user: "{{ jenkins_user }}"
+    jenkins_token: "{{ jenkins_token }}"
+    jenkins_base_url: ""             # Prompted at launch
+    jenkins_build_number: ""         # Prompted at launch
+
+    was_user: "{{ was_user }}"
+    was_password: "{{ was_password }}"
+    wps_user: "{{ wps_user }}"
+    wps_password: "{{ wps_password }}"
+
+    owner: ""                        # Prompted at launch (Docker user ID)
+
+    ear_dest_dir: "/opt/WAS/Emomed/ear"
+    update_scripts_dir: "/opt/WAS/Emomed/scripts"
+    deploy_script_path: "/opt/WAS/Emomed/scripts/Emomed_Update_ear.py"
+
+    ear_container_dir: "/opt/WAS/ear"
+    script_container_dir: "/opt/WAS/scripts"
+
+    ear_mappings:
+      - { ear_file: "EmomedWasEAR.ear", app_name: "EmomedWasEAR", server_type: "was" }
+      - { ear_file: "MessageDrivenEJBEAR.ear", app_name: "MessageDrivenEJBEAR", server_type: "was" }
+      - { ear_file: "CommonAdminUtilsEAR.ear", app_name: "CommonAdminUtilsEAR", server_type: "wps" }
+      - { ear_file: "EmomedPortalEAR.ear", app_name: "EmomedPortalEAR", server_type: "wps" }
+      - { ear_file: "HCPCVaadinEAR.ear", app_name: "HCPCVaadinEAR", server_type: "wps" }
+
+    was_profile_wsadmin: "/opt/IBM/WebSphere/AppServer/profiles/AppSrv01/bin/wsadmin.sh"
+    wps_profile_wsadmin: "/opt/HCL/wp_profile/bin/wsadmin.sh"
+
+  tasks:
+
+    - name: Fail if critical values are not provided
+      fail:
+        msg: "ERROR: Required values (container_name, jenkins_base_url, jenkins_build_number, owner, credentials) missing."
+      when: container_name == "" or jenkins_base_url == "" or jenkins_build_number == "" or owner == "" or was_user == "" or was_password == "" or wps_user == "" or wps_password == ""
+
+    - name: Ensure EAR destination directory exists on host
+      file:
+        path: "{{ ear_dest_dir }}"
+        state: directory
+        owner: "{{ owner }}"
+        group: "{{ owner }}"
+        mode: '0755'
+
+    - name: Ensure update_scripts_dir exists on host
+      file:
+        path: "{{ update_scripts_dir }}"
+        state: directory
+        owner: "{{ owner }}"
+        group: "{{ owner }}"
+        mode: '0755'
+
+    - name: Download all EARs from Jenkins
+      get_url:
+        url: "{{ jenkins_base_url }}/{{ jenkins_build_number }}/artifact/masterBuild/artifacts/{{ item.ear_file }}"
+        dest: "{{ ear_dest_dir }}/{{ item.ear_file }}"
+        url_username: "{{ jenkins_user }}"
+        url_password: "{{ jenkins_token }}"
+        force_basic_auth: yes
+        force: yes
+        mode: '0644'
+      loop: "{{ ear_mappings }}"
+
+    - name: Create EAR and scripts directories inside container
+      block:
+        - name: Create EAR directory
+          command: docker exec {{ container_name }} mkdir -p {{ ear_container_dir }}
+
+        - name: Create scripts directory
+          command: docker exec {{ container_name }} mkdir -p {{ script_container_dir }}
+
+    - name: Copy Emomed_Update_ear.py script to container
+      command: docker cp {{ deploy_script_path }} {{ container_name }}:{{ script_container_dir }}/Emomed_Update_ear.py
+
+    - name: Remove old EARs inside container
+      loop: "{{ ear_mappings }}"
+      loop_control:
+        loop_var: ear
+      command: docker exec {{ container_name }} rm -f {{ ear_container_dir }}/{{ ear.ear_file }}
+
+    - name: Copy EARs into container
+      loop: "{{ ear_mappings }}"
+      loop_control:
+        loop_var: ear
+      command: docker cp {{ ear_dest_dir }}/{{ ear.ear_file }} {{ container_name }}:{{ ear_container_dir }}/{{ ear.ear_file }}
+
+    - name: Deploy EARs inside container
+      loop: "{{ ear_mappings }}"
+      loop_control:
+        loop_var: ear
+      command: >
+        docker exec {{ container_name }}
+        {{
+          (ear.server_type == 'was') | ternary(was_profile_wsadmin, wps_profile_wsadmin)
+        }}
+        -lang jython
+        -user {{
+          (ear.server_type == 'was') | ternary(was_user, wps_user)
+        }}
+        -password {{
+          (ear.server_type == 'was') | ternary(was_password, wps_password)
+        }}
+        -f {{ script_container_dir }}/Emomed_Update_ear.py
+        {{ ear_container_dir }}/{{ ear.ear_file }}
+        {{ ear.app_name }}
+      args:
+        executable: /bin/bash

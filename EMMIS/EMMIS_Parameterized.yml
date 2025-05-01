@@ -1,0 +1,96 @@
+- name: Download and Deploy EARs to WebSphere
+  hosts: all
+  become: yes
+
+  vars:
+    owner: ""                          # Prompted at launch (user ID)
+    container_name: ""                # Prompted at launch
+    jenkins_user: "{{ jenkins_user }}"  # From AWX credential or prompt
+    jenkins_token: "{{ jenkins_token }}"
+    jenkins_base_url: ""              # Prompted
+    jenkins_build_number: ""          # Prompted
+
+    was_user: "{{ was_user }}"
+    was_password: "{{ was_password }}"
+
+    ear_dest_dir: "/opt/WAS/Emmis/ear"                       
+    update_scripts_dir: "/opt/WAS/Emmis/scripts"
+    ear_container_dir: "/opt/WAS/ear"
+    script_container_dir: "/opt/WAS/scripts"
+
+    was_profile_wsadmin: "/opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin/wsadmin.sh"
+
+    ear_list:
+      - name: "medicaid_EAR6.ear"
+        script: "update_medicaid_app.py"
+      - name: "medicaidSupplementsEAR.ear"
+        script: "updatemedicaidSupplements_app.py"
+
+  tasks:
+
+    - name: Fail if required variables are missing
+      fail:
+        msg: "ERROR: container_name, jenkins_base_url, build number, or owner is missing!"
+      when: container_name == "" or jenkins_base_url == "" or jenkins_build_number == "" or owner == ""
+
+    - name: Ensure EAR destination directory exists
+      file:
+        path: "{{ ear_dest_dir }}"
+        state: directory
+        owner: "{{ owner }}"
+        group: "{{ owner }}"
+        mode: '0755'
+
+    - name: Ensure update_scripts_dir exists
+      file:
+        path: "{{ update_scripts_dir }}"
+        state: directory
+        owner: "{{ owner }}"
+        group: "{{ owner }}"
+        mode: '0755'
+
+    - name: Download EAR files from Jenkins
+      get_url:
+        url: "{{ jenkins_base_url }}/{{ jenkins_build_number }}/artifact/masterBuild/artifacts/{{ item.name }}"
+        dest: "{{ ear_dest_dir }}/{{ item.name }}"
+        url_username: "{{ jenkins_user }}"
+        url_password: "{{ jenkins_token }}"
+        force_basic_auth: yes
+        force: yes
+        mode: '0644'
+      loop: "{{ ear_list }}"
+      loop_control:
+        label: "{{ item.name }}"
+
+    - name: Create EAR and script directories inside container
+      block:
+        - name: Create EAR directory
+          command: docker exec {{ container_name }} mkdir -p {{ ear_container_dir }}
+        - name: Create script directory
+          command: docker exec {{ container_name }} mkdir -p {{ script_container_dir }}
+
+    - name: Remove old EARs from container
+      loop: "{{ ear_list }}"
+      command: docker exec {{ container_name }} rm -f {{ ear_container_dir }}/{{ item.name }}
+
+    - name: Copy EARs and scripts into container
+      block:
+        - name: Copy EARs
+          loop: "{{ ear_list }}"
+          command: docker cp {{ ear_dest_dir }}/{{ item.name }} {{ container_name }}:{{ ear_container_dir }}/{{ item.name }}
+
+        - name: Copy EAR update scripts
+          loop: "{{ ear_list }}"
+          command: docker cp {{ update_scripts_dir }}/{{ item.script }} {{ container_name }}:{{ script_container_dir }}/{{ item.script }}
+
+    - name: Deploy EARs inside WebSphere
+      loop: "{{ ear_list }}"
+      command: >
+        docker exec {{ container_name }} {{ was_profile_wsadmin }}
+        -lang jython
+        -user {{ was_user }}
+        -password {{ was_password }}
+        -f {{ script_container_dir }}/{{ item.script }}
+        {{ ear_container_dir }}/{{ item.name }}
+      args:
+        executable: /bin/bash
