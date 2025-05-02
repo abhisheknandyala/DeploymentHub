@@ -36,8 +36,8 @@
       file:
         path: "{{ ear_dest_dir }}"
         state: directory
-        owner: anandyala
-        group: anandyala
+        owner: "{{ owner }}"
+        group: "{{ owner }}"
         mode: '0755'
 
     - name: Ensure update_scripts_dir exists on host
