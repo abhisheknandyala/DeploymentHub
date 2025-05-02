@@ -3,13 +3,15 @@
   become: yes
 
   vars:
-    container_name: ""               
-    was_install_dir: ""              
-    was_profile_dir: ""              
-    was_repo_path: ""                
+    container_name: ""
+    was_install_dir: ""
+    was_profile_dir: ""
+    was_repo_path: ""
+    was_feature_id: ""
 
-    ihs_install_dir: ""              
-    ihs_repo_path: ""                
+    ihs_install_dir: ""
+    ihs_repo_path: ""
+    ihs_feature_id: ""
 
     backup_dir: "/backup/{{ inventory_hostname }}/{{ ansible_date_time.date }}"
 
@@ -19,7 +21,6 @@
         path: "{{ backup_dir }}"
         state: directory
 
-    # ===  WAS BACKUP ===
     - name: Backup WAS profiles
       shell: |
         docker exec {{ container_name }} tar czf /tmp/was_profiles.tar.gz {{ was_profile_dir }}
@@ -27,25 +28,22 @@
 
     - name: Backup WAS config (backupConfig.sh)
       shell: |
-        docker exec {{ container_name }} {{ was_install_dir }}/AppServer/bin/backupConfig.sh /tmp/was_config_backup.zip
+        docker exec {{ container_name }} {{ was_install_dir }}/bin/backupConfig.sh /tmp/was_config_backup.zip
         docker cp {{ container_name }}:/tmp/was_config_backup.zip {{ backup_dir }}/was_config_backup.zip
 
-    # ===  IHS BACKUP ===
     - name: Backup IHS installation
       shell: |
         docker exec {{ container_name }} tar czf /tmp/ihs_backup.tar.gz {{ ihs_install_dir }}
         docker cp {{ container_name }}:/tmp/ihs_backup.tar.gz {{ backup_dir }}/ihs_backup.tar.gz
 
-    # === WAS Upgrade ===
     - name: Upgrade WebSphere Application Server inside container
       shell: >
         docker exec --user was {{ container_name }} /opt/IBM/InstallationManager/eclipse/tools/imcl install {{ was_feature_id }}
         -repositories {{ was_repo_path }}
-        -installationDirectory {{ was_install_dir }}/AppServer
+        -installationDirectory {{ was_install_dir }}
         -acceptLicense
         -log /tmp/was_upgrade_log.xml
 
-    # === IHS Upgrade ===
     - name: Upgrade IBM HTTP Server inside container (as was)
       shell: >
         docker exec --user was {{ container_name }} /opt/IBM/InstallationManager/eclipse/tools/imcl install {{ ihs_feature_id }}
