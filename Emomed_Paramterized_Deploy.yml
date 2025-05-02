@@ -53,7 +53,14 @@
         owner: anandyala
         group: anandyala
         mode: '0755'
-
+    
+    - name: Copy Emomed_Update_ear.py to update_scripts_dir on host
+      copy:
+        src: "Emomed_Update_ear.py"
+        dest: "{{ update_scripts_dir }}/Emomed_Update_ear.py"
+        owner: anandyala
+        group: anandyala
+        mode: '0755'
 
     - name: Download all EARs from Jenkins
       get_url:
