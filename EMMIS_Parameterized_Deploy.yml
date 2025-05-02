@@ -49,6 +49,7 @@
         force_basic_auth: yes
         force: yes
         mode: '0644'
+        validate_certs: no
       loop: "{{ ear_list }}"
       loop_control:
         label: "{{ item.name }}"
