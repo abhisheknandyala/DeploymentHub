@@ -40,6 +40,27 @@
         group: anandyala
         mode: '0755'
 
+    - name: Ensure update_scripts_dir exists on host
+      file:
+        path: "{{ update_scripts_dir }}"
+        state: directory
+        owner: "{{ owner }}"
+        group: "{{ owner }}"
+        mode: '0755'
+
+
+    - name: Copy update scripts to target host
+      copy:
+        src: "{{ item }}"
+        dest: "{{ update_scripts_dir }}/{{ item }}"
+        owner: "{{ owner }}"
+        group: "{{ owner }}"
+        mode: '0755'
+      loop:
+        - "update_medicaid_app.py"
+        - "updatemedicaidSupplements_app.py"
+
+
     - name: Download EAR files from Jenkins
       get_url:
         url: "{{ jenkins_base_url }}/{{ jenkins_build_number }}/artifact/masterBuild/artifacts/{{ item.name }}"
