@@ -14,9 +14,9 @@
     update_scripts_dir: "/home/anandyala/WAS/DockerTS/scripts"
 
     ear_downloads:
-      - url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/view/eMMIS/job/eMMIS_Apr_June_Release/lastSuccessfulBuild/artifact/masterBuild/artifacts/medicaid_EAR6.ear"
+      - url: ""
         dest: "{{ ear_dest_dir }}/medicaid_EAR6.ear"
-      - url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/view/eMMIS/job/eMMIS_Apr_June_Release/lastSuccessfulBuild/artifact/masterBuild/artifacts/medicaidSupplementsEAR.ear"
+      - url: ""
         dest: "{{ ear_dest_dir }}/medicaidSupplementsEAR.ear"
 
   tasks:

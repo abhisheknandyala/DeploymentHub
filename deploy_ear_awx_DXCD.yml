@@ -13,9 +13,9 @@
 
 
     ear_downloads:
-      - url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/job/eMMIS-DXCD/lastSuccessfulBuild/artifact/masterBuild/artifacts/medicaid_EAR6.ear"
+      - url: ""
         dest: "{{ ear_dest_dir }}/medicaid_EAR6.ear"
-      - url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/job/eMMIS-DXCD/lastSuccessfulBuild/artifact/masterBuild/artifacts/medicaidSupplementsEAR.ear"
+      - url: ""
         dest: "{{ ear_dest_dir }}/medicaidSupplementsEAR.ear"
 
   tasks:

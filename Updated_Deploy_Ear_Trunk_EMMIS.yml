@@ -12,9 +12,9 @@
     script_container_dir: "/opt/WAS/scripts"
 
     ear_downloads:
-      - url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/view/eMMIS/job/eMMISJSF2Trunk/lastSuccessfulBuild/artifact/masterBuild/artifacts/medicaid_EAR6.ear"
+      - url: ""
         dest: "{{ ear_dest_dir }}/medicaid_EAR6.ear"
-      - url: "http://mdcmwp-jenkins.mcd.ifox.loc:8080/view/eMMIS/job/eMMISJSF2Trunk/lastSuccessfulBuild/artifact/masterBuild/artifacts/medicaidSupplementsEAR.ear"
+      - url: ""
         dest: "{{ ear_dest_dir }}/medicaidSupplementsEAR.ear"
 
   tasks:
