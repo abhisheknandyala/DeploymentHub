@@ -66,7 +66,8 @@
         /opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin/wsadmin.sh
         -lang jython
         -user {{ was_user }}
-        -password {{ was_password }}
+        -password {{ was
+        ]_password }}
         -f {{ script_container_dir }}/update_medicaid_app.py
         {{ ear_container_dir }}/medicaid_EAR6.ear
 
