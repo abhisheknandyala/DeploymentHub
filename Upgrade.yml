@@ -1,5 +1,5 @@
 - name: Backup and Upgrade Java, WAS, WPS, IHS in a Single Docker Container
-  hosts: "{{ target_host }}"
+  hosts: all
   become: yes
 
   vars:
