@@ -1,5 +1,5 @@
 - name: Download and Deploy EARs to WebSphere and WebSphere Portal
-  hosts: "WAS_Hosts"
+  hosts: WAS_Hosts
   become: yes
 
   vars:
