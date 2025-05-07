@@ -1,5 +1,5 @@
 - name: Download and Deploy EARs to WebSphere
-  hosts: 10.112.30.40
+  hosts: "{{ target_host }}" 
   become: yes
 
   vars:
