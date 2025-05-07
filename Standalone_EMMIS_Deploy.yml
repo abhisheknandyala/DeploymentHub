@@ -1,0 +1,80 @@
+- name: Download and Deploy EARs to Standalone WebSphere
+  hosts: "{{ target_host }}"
+  become: yes
+
+  vars:
+    jenkins_user: "{{ jenkins_user }}"
+    jenkins_token: "{{ jenkins_token }}"
+    jenkins_base_url: ""            # Prompt at Launch
+    jenkins_build_number: ""        # Prompt at Launch
+    was_user: "{{ was_user }}"
+    was_password: "{{ was_password }}"
+    owner: "{{ owner }}"            # Prompt at Launch
+
+    ear_dest_dir: "/home/anandyala/WAS/Emmis/ear"
+    update_scripts_dir: "/home/anandyala/WAS/Emmis/scripts"
+    was_profile_wsadmin: "/opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin/wsadmin.sh"
+
+    ear_list:
+      - name: "medicaid_EAR6.ear"
+        script: "update_medicaid_app.py"
+      - name: "medicaidSupplementsEAR.ear"
+        script: "updatemedicaidSupplements_app.py"
+
+  tasks:
+
+    - name: Fail if required variables are missing
+      fail:
+        msg: "ERROR: Missing required values: jenkins_base_url, jenkins_build_number, or credentials."
+      when: jenkins_base_url == "" or jenkins_build_number == "" or was_user == "" or was_password == "" or owner == ""
+
+    - name: Ensure EAR destination directory exists
+      file:
+        path: "{{ ear_dest_dir }}"
+        state: directory
+        owner: "{{ owner }}"
+        group: "{{ owner }}"
+        mode: '0755'
+
+    - name: Ensure update_scripts_dir exists
+      file:
+        path: "{{ update_scripts_dir }}"
+        state: directory
+        owner: "{{ owner }}"
+        group: "{{ owner }}"
+        mode: '0755'
+
+    - name: Copy EAR update scripts to target
+      copy:
+        src: "{{ item }}"
+        dest: "{{ update_scripts_dir }}/{{ item }}"
+        owner: "{{ owner }}"
+        group: "{{ owner }}"
+        mode: '0755'
+      loop:
+        - "update_medicaid_app.py"
+        - "updatemedicaidSupplements_app.py"
+
+    - name: Download EAR files from Jenkins
+      get_url:
+        url: "{{ jenkins_base_url }}/{{ jenkins_build_number }}/artifact/masterBuild/artifacts/{{ item.name }}"
+        dest: "{{ ear_dest_dir }}/{{ item.name }}"
+        url_username: "{{ jenkins_user }}"
+        url_password: "{{ jenkins_token }}"
+        force_basic_auth: yes
+        force: yes
+        mode: '0644'
+        validate_certs: no
+      loop: "{{ ear_list }}"
+
+    - name: Deploy EARs to standalone WebSphere
+      loop: "{{ ear_list }}"
+      command: >
+        {{ was_profile_wsadmin }}
+        -lang jython
+        -user {{ was_user }}
+        -password {{ was_password }}
+        -f {{ update_scripts_dir }}/{{ item.script }}
+        {{ ear_dest_dir }}/{{ item.name }}
+      args:
+        executable: /bin/bash
