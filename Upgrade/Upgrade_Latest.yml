@@ -21,36 +21,37 @@
     was_password: ""
 
   tasks:
-    - name: Ensure container is running
-      shell: docker inspect -f '{{ '{{' }}.State.Running{{ '}}' }}' {{ container_name }}
-      register: container_status
-      changed_when: false
-      failed_when: false
 
-    - name: Start container if it is not running
-      shell: docker start {{ container_name }}
-      when: container_status.stdout != 'true'
-
-    - name: Stop WebSphere Application Server
+    - name: Stop WebSphere Application Server (ignore if already stopped)
       shell: >
         docker exec {{ container_name }} /opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin/stopServer.sh server1
         -user {{ was_user }} -password {{ was_password }}
+      register: stop_was
+      failed_when: stop_was.rc not in [0, 246]
 
-    - name: Stop IBM HTTP Server
+    - name: Stop IBM HTTP Server (ignore if already stopped)
       shell: >
         docker exec {{ container_name }} {{ ihs_install_dir }}/bin/apachectl stop
+      register: stop_ihs
+      failed_when: stop_ihs.rc not in [0, 1]  # 1 usually means it was already stopped
 
-    - name: List WebSphere Application Server Fix Packs
+    - name: List WebSphere Application Server Fix Packs (as was)
       shell: >
-        docker exec --user was {{ container_name }} bash -lc "export JAVA_OPTS='-Xmx512m' && /opt/IBM/InstallationManager/eclipse/tools/imcl listAvailablePackages -repositories {{ was_repo_path }}"
+        docker exec --user was {{ container_name }} bash -lc 'export JAVA_OPTS="-Xmx512m" && /opt/IBM/InstallationManager/eclipse/tools/imcl listAvailablePackages -repositories {{ was_repo_path }}'
+      register: was_list
+      ignore_errors: true
 
-    - name: List IBM HTTP Server Fix Packs
+    - name: List IBM HTTP Server Fix Packs (as was)
       shell: >
-        docker exec --user was {{ container_name }} bash -lc "export JAVA_OPTS='-Xmx512m' && /opt/IBM/InstallationManager/eclipse/tools/imcl listAvailablePackages -repositories {{ ihs_repo_path }}"
+        docker exec --user was {{ container_name }} bash -lc 'export JAVA_OPTS="-Xmx512m" && /opt/IBM/InstallationManager/eclipse/tools/imcl listAvailablePackages -repositories {{ ihs_repo_path }}'
+      register: ihs_list
+      ignore_errors: true
 
-    - name: List Java Fix Packs
+    - name: List Java Fix Packs (as was)
       shell: >
-        docker exec --user was {{ container_name }} bash -lc "export JAVA_OPTS='-Xmx512m' && /opt/IBM/InstallationManager/eclipse/tools/imcl listAvailablePackages -repositories {{ java_repo_path }}"
+        docker exec --user was {{ container_name }} bash -lc 'export JAVA_OPTS="-Xmx512m" && /opt/IBM/InstallationManager/eclipse/tools/imcl listAvailablePackages -repositories {{ java_repo_path }}'
+      register: java_list
+      ignore_errors: true
 
     - name: Upgrade WebSphere Application Server
       shell: >
