@@ -1,6 +1,6 @@
 - name: Backup and Upgrade WAS & IHS in a Single Docker Container
   hosts: all
-  # become: yes
+  become: yes
 
   vars:
     container_name: ""
@@ -27,11 +27,11 @@
     
     - name: Stop the  WebSphere Application Server 
       shell: >
-        docker exec --user was {{ container_name }} /opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin/stopServer.sh server1 -user {{was_user}} -password {{was_password}}
+        docker exec {{ container_name }} /opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin/stopServer.sh server1 -user {{was_user}} -password {{was_password}}
         
     - name: Stop the  HTTP Server 
       shell: >
-        docker exec --user was {{ container_name }} {{ ihs_install_dir }}/bin/apachectl stop
+        docker exec {{ container_name }} {{ ihs_install_dir }}/bin/apachectl stop
 
     - name: Backup WAS profiles
       shell: |
