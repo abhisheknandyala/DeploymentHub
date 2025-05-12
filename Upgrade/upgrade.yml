@@ -27,7 +27,7 @@
     
     - name: Stop the  WebSphere Application Server 
       shell: >
-        docker exec --user was {{ container_name }} /opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin server1 -user {{was_user}} -password {{was_password}}
+        docker exec --user was {{ container_name }} /opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin/stopServer.sh server1 -user {{was_user}} -password {{was_password}}
         
     - name: Stop the  HTTP Server 
       shell: >
