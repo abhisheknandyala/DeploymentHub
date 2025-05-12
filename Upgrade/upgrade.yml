@@ -1,6 +1,6 @@
 - name: Backup and Upgrade WAS & IHS in a Single Docker Container
   hosts: all
-  become: yes
+  # become: yes
 
   vars:
     container_name: ""
