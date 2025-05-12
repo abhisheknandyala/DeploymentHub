@@ -46,6 +46,18 @@
         -repositories {{ was_repo_path }}
         -log /tmp/was_list_log.xml
     
+    - name: List HTTP Server Fix Packs inside container
+      shell: >
+        docker exec --user was {{ container_name }} /opt/IBM/InstallationManager/eclipse/tools/imcl listAvailablePackages {{ ihs_feature_id }}
+        -repositories {{ was_repo_path }}
+        -log /tmp/ihs_list_log.xml
+    
+    - name: List Java Server Fix Packs inside container
+      shell: >
+        docker exec --user was {{ container_name }} /opt/IBM/InstallationManager/eclipse/tools/imcl listAvailablePackages {{ java_feature_id }}
+        -repositories {{ was_repo_path }}
+        -log /tmp/java_list_log.xml
+    
     - name: Upgrade WebSphere Application Server inside container
       shell: >
         docker exec --user was {{ container_name }} /opt/IBM/InstallationManager/eclipse/tools/imcl install {{ was_feature_id }}
