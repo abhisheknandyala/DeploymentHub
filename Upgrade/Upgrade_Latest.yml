@@ -17,8 +17,8 @@
     java_repo_path: ""
     java_feature_id: ""
 
-    was_user: "was"
-    was_password: "yourpassword"   # if needed for stopServer.sh
+    was_user: 
+    was_password: 
 
   tasks:
 
