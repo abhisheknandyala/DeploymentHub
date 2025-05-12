@@ -38,15 +38,15 @@
         docker exec {{ container_name }} tar czf /tmp/was_profiles.tar.gz {{ was_profile_dir }}
         docker cp {{ container_name }}:/tmp/was_profiles.tar.gz {{ backup_dir }}/was_profiles.tar.gz
 
-    - name: Backup WAS config (backupConfig.sh)
-      shell: |
-        docker exec {{ container_name }} {{ was_install_dir }}/bin/backupConfig.sh /tmp/was_config_backup.zip
-        docker cp {{ container_name }}:/tmp/was_config_backup.zip {{ backup_dir }}/was_config_backup.zip
+    #- name: Backup WAS config (backupConfig.sh)
+    #  shell: |
+    #    docker exec {{ container_name }} {{ was_install_dir }}/bin/backupConfig.sh /tmp/was_config_backup.zip
+    #    docker cp {{ container_name }}:/tmp/was_config_backup.zip {{ backup_dir }}/was_config_backup.zip
 
-    - name: Backup IHS installation
-      shell: |
-        docker exec {{ container_name }} tar czf /tmp/ihs_backup.tar.gz {{ ihs_install_dir }}
-        docker cp {{ container_name }}:/tmp/ihs_backup.tar.gz {{ backup_dir }}/ihs_backup.tar.gz
+    #- name: Backup IHS installation
+    #  shell: |
+    #    docker exec {{ container_name }} tar czf /tmp/ihs_backup.tar.gz {{ ihs_install_dir }}
+    #    docker cp {{ container_name }}:/tmp/ihs_backup.tar.gz {{ backup_dir }}/ihs_backup.tar.gz
 
     - name: List WebSphere Application Server Fix Packs inside container
       shell: >
