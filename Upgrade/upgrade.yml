@@ -34,22 +34,22 @@
         docker exec {{ container_name }} {{ ihs_install_dir }}/bin/apachectl stop
 
     
-    - name: List WebSphere Application Server Fix Packs inside container
-      shell: >
-        docker exec --user was {{ container_name }} /opt/IBM/InstallationManager/eclipse/tools/imcl listAvailablePackages
-        -repositories {{ was_repo_path }}
+  #  - name: List WebSphere Application Server Fix Packs inside container
+  #    shell: >
+  #      docker exec --user was {{ container_name }} /opt/IBM/InstallationManager/eclipse/tools/imcl listAvailablePackages
+  #      -repositories {{ was_repo_path }}
         
     
-    - name: List HTTP Server Fix Packs inside container
-      shell: >
-        docker exec --user was {{ container_name }} /opt/IBM/InstallationManager/eclipse/tools/imcl listAvailablePackages
-        -repositories {{ was_repo_path }}
+  #  - name: List HTTP Server Fix Packs inside container
+  #    shell: >
+  #      docker exec --user was {{ container_name }} /opt/IBM/InstallationManager/eclipse/tools/imcl listAvailablePackages
+  #      -repositories {{ was_repo_path }}
         
     
-    - name: List Java Server Fix Packs inside container
-      shell: >
-        docker exec --user was {{ container_name }} /opt/IBM/InstallationManager/eclipse/tools/imcl listAvailablePackages 
-        -repositories {{ was_repo_path }}
+  #  - name: List Java Server Fix Packs inside container
+  #    shell: >
+  #      docker exec --user was {{ container_name }} /opt/IBM/InstallationManager/eclipse/tools/imcl listAvailablePackages 
+  #      -repositories {{ was_repo_path }}
         
         
     - name: Upgrade WebSphere Application Server inside container
