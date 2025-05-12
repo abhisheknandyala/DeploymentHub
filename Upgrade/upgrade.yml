@@ -24,6 +24,14 @@
       file:
         path: "{{ backup_dir }}"
         state: directory
+    
+    - name: Stop the  WebSphere Application Server 
+      shell: >
+        docker exec --user was {{ container_name }} {{ was_install_dir }}/bin/stopServer.sh server1
+        
+    - name: Stop the  HTTP Server 
+      shell: >
+        docker exec --user was {{ container_name }} {{ ihs_install_dir }}/bin/apachectl stop
 
     - name: Backup WAS profiles
       shell: |
@@ -57,16 +65,7 @@
         docker exec --user was {{ container_name }} /opt/IBM/InstallationManager/eclipse/tools/imcl listAvailablePackages {{ java_feature_id }}
         -repositories {{ was_repo_path }}
         -log /tmp/java_list_log.xml
-
-    - name: Stop the  WebSphere Application Server 
-      shell: >
-        docker exec --user was {{ container_name }} {{ was_install_dir }}/bin/stopServer.sh server1
         
-    - name: Stop the  HTTP Server 
-      shell: >
-        docker exec --user was {{ container_name }} {{ ihs_install_dir }}/bin/apachectl stop
-        
-
     - name: Upgrade WebSphere Application Server inside container
       shell: >
         docker exec --user was {{ container_name }} /opt/IBM/InstallationManager/eclipse/tools/imcl install {{ was_feature_id }}
