@@ -33,26 +33,22 @@
 
     - name: List WebSphere Application Server Fix Packs
       shell: >
-        docker exec --user was {{ container_name }} bash -c "
-        /opt/IBM/InstallationManager/eclipse/tools/imcl listAvailablePackages
+        docker exec --user was {{ container_name }} /opt/IBM/InstallationManager/eclipse/tools/imcl listAvailablePackages
         -repositories {{ was_repo_path }}"
 
     - name: List IBM HTTP Server Fix Packs
       shell: >
-        docker exec --user was {{ container_name }} bash -c "
-        /opt/IBM/InstallationManager/eclipse/tools/imcl listAvailablePackages
+        docker exec --user was {{ container_name }} /opt/IBM/InstallationManager/eclipse/tools/imcl listAvailablePackages
         -repositories {{ ihs_repo_path }}"
 
     - name: List Java Fix Packs
       shell: >
-        docker exec --user was {{ container_name }} bash -c "
-        /opt/IBM/InstallationManager/eclipse/tools/imcl listAvailablePackages
+        docker exec --user was {{ container_name }} /opt/IBM/InstallationManager/eclipse/tools/imcl listAvailablePackages
         -repositories {{ java_repo_path }}"
 
     - name: Upgrade WebSphere Application Server
       shell: >
-        docker exec --user was {{ container_name }} bash -c "
-        /opt/IBM/InstallationManager/eclipse/tools/imcl install {{ was_feature_id }}
+        docker exec --user was {{ container_name }} /opt/IBM/InstallationManager/eclipse/tools/imcl install {{ was_feature_id }}
         -repositories {{ was_repo_path }}
         -installationDirectory {{ was_install_dir }}
         -acceptLicense
@@ -60,7 +56,7 @@
 
     - name: Upgrade IBM HTTP Server
       shell: >
-        docker exec --user was {{ container_name }} bash -c "
+        docker exec --user was {{ container_name }}  "
         /opt/IBM/InstallationManager/eclipse/tools/imcl install {{ ihs_feature_id }}
         -repositories {{ ihs_repo_path }}
         -installationDirectory {{ ihs_install_dir }}
@@ -69,7 +65,7 @@
 
     - name: Upgrade Java
       shell: >
-        docker exec --user was {{ container_name }} bash -c "
+        docker exec --user was {{ container_name }}  "
         /opt/IBM/InstallationManager/eclipse/tools/imcl install {{ java_feature_id }}
         -repositories {{ java_repo_path }}
         -installationDirectory {{ java_install_dir }}
