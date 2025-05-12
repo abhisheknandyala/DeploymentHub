@@ -33,17 +33,17 @@
 
     - name: List WebSphere Application Server Fix Packs
       shell: >
-        docker exec --user was {{ container_name }} /opt/IBM/InstallationManager/eclipse/tools/imcl listAvailablePackages
+        docker exec {{ container_name }} /opt/IBM/InstallationManager/eclipse/tools/imcl listAvailablePackages
         -repositories {{ was_repo_path }}"
 
     - name: List IBM HTTP Server Fix Packs
       shell: >
-        docker exec --user was {{ container_name }} /opt/IBM/InstallationManager/eclipse/tools/imcl listAvailablePackages
+        docker exec {{ container_name }} /opt/IBM/InstallationManager/eclipse/tools/imcl listAvailablePackages
         -repositories {{ ihs_repo_path }}"
 
     - name: List Java Fix Packs
       shell: >
-        docker exec --user was {{ container_name }} /opt/IBM/InstallationManager/eclipse/tools/imcl listAvailablePackages
+        docker exec {{ container_name }} /opt/IBM/InstallationManager/eclipse/tools/imcl listAvailablePackages
         -repositories {{ java_repo_path }}"
 
     - name: Upgrade WebSphere Application Server
