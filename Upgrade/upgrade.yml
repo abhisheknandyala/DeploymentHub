@@ -17,13 +17,13 @@
     java_repo_path: ""
     java_feature_id: ""
 
-    backup_dir: "/tmp/backup/{{ inventory_hostname }}/{{ ansible_date_time.date }}"
+   # backup_dir: "/tmp/backup/{{ inventory_hostname }}/{{ ansible_date_time.date }}"
 
   tasks:
-    - name: Create backup directory on Docker host
-      file:
-        path: "{{ backup_dir }}"
-        state: directory
+    #- name: Create backup directory on Docker host
+    # file:
+    #    path: "{{ backup_dir }}"
+    #    state: directory
     
     - name: Stop the  WebSphere Application Server 
       shell: >
