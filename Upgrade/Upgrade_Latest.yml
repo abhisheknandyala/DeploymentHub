@@ -12,13 +12,13 @@
     ihs_install_dir: ""
     ihs_repo_path: ""
     ihs_feature_id: ""
-    
+
     java_install_dir: ""
     java_repo_path: ""
     java_feature_id: ""
 
-    was_user: 
-    was_password: 
+    was_user: ""
+    was_password: ""
 
   tasks:
 
@@ -31,53 +31,47 @@
       shell: >
         docker exec {{ container_name }} {{ ihs_install_dir }}/bin/apachectl stop
 
-    - name: List WebSphere Application Server Fix Packs (as was)
+    - name: List WebSphere Application Server Fix Packs
       shell: >
-        docker exec --user was {{ container_name }} bash -c '
-        source /home/was/.bash_profile &&
+        docker exec --user was {{ container_name }} bash -c "
         /opt/IBM/InstallationManager/eclipse/tools/imcl listAvailablePackages
-        -repositories {{ was_repo_path }}'
+        -repositories {{ was_repo_path }}"
 
-    - name: List IBM HTTP Server Fix Packs (as was)
+    - name: List IBM HTTP Server Fix Packs
       shell: >
-        docker exec --user was {{ container_name }} bash -c '
-        source /home/was/.bash_profile &&
+        docker exec --user was {{ container_name }} bash -c "
         /opt/IBM/InstallationManager/eclipse/tools/imcl listAvailablePackages
-        -repositories {{ ihs_repo_path }}'
+        -repositories {{ ihs_repo_path }}"
 
-    - name: List Java Fix Packs (as was)
+    - name: List Java Fix Packs
       shell: >
-        docker exec --user was {{ container_name }} bash -c '
-        source /home/was/.bash_profile &&
+        docker exec --user was {{ container_name }} bash -c "
         /opt/IBM/InstallationManager/eclipse/tools/imcl listAvailablePackages
-        -repositories {{ java_repo_path }}'
+        -repositories {{ java_repo_path }}"
 
-    - name: Upgrade WebSphere Application Server (as was)
+    - name: Upgrade WebSphere Application Server
       shell: >
-        docker exec --user was {{ container_name }} bash -c '
-        source /home/was/.bash_profile &&
+        docker exec --user was {{ container_name }} bash -c "
         /opt/IBM/InstallationManager/eclipse/tools/imcl install {{ was_feature_id }}
         -repositories {{ was_repo_path }}
         -installationDirectory {{ was_install_dir }}
         -acceptLicense
-        -log /tmp/was_upgrade.log'
+        -log /tmp/was_upgrade.log"
 
-    - name: Upgrade IBM HTTP Server (as was)
+    - name: Upgrade IBM HTTP Server
       shell: >
-        docker exec --user was {{ container_name }} bash -c '
-        source /home/was/.bash_profile &&
+        docker exec --user was {{ container_name }} bash -c "
         /opt/IBM/InstallationManager/eclipse/tools/imcl install {{ ihs_feature_id }}
         -repositories {{ ihs_repo_path }}
         -installationDirectory {{ ihs_install_dir }}
         -acceptLicense
-        -log /tmp/ihs_upgrade.log'
+        -log /tmp/ihs_upgrade.log"
 
-    - name: Upgrade Java (as was)
+    - name: Upgrade Java
       shell: >
-        docker exec --user was {{ container_name }} bash -c '
-        source /home/was/.bash_profile &&
+        docker exec --user was {{ container_name }} bash -c "
         /opt/IBM/InstallationManager/eclipse/tools/imcl install {{ java_feature_id }}
         -repositories {{ java_repo_path }}
         -installationDirectory {{ java_install_dir }}
         -acceptLicense
-        -log /tmp/java_upgrade.log'
+        -log /tmp/java_upgrade.log"
