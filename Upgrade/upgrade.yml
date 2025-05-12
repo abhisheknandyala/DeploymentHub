@@ -27,7 +27,7 @@
     
     - name: Stop the  WebSphere Application Server 
       shell: >
-        docker exec --user was {{ container_name }} /opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS server1
+        docker exec --user was {{ container_name }} /opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS server1 -user {{was_user}} -password {{was_password}}
         
     - name: Stop the  HTTP Server 
       shell: >
@@ -50,19 +50,19 @@
 
     - name: List WebSphere Application Server Fix Packs inside container
       shell: >
-        docker exec --user was {{ container_name }} /opt/IBM/InstallationManager/eclipse/tools/imcl listAvailablePackages {{ was_feature_id }}
+        docker exec --user was {{ container_name }} /opt/IBM/InstallationManager/eclipse/tools/imcl listAvailablePackages
         -repositories {{ was_repo_path }}
         -log /tmp/was_list_log.xml
     
     - name: List HTTP Server Fix Packs inside container
       shell: >
-        docker exec --user was {{ container_name }} /opt/IBM/InstallationManager/eclipse/tools/imcl listAvailablePackages {{ ihs_feature_id }}
+        docker exec --user was {{ container_name }} /opt/IBM/InstallationManager/eclipse/tools/imcl listAvailablePackages
         -repositories {{ was_repo_path }}
         -log /tmp/ihs_list_log.xml
     
     - name: List Java Server Fix Packs inside container
       shell: >
-        docker exec --user was {{ container_name }} /opt/IBM/InstallationManager/eclipse/tools/imcl listAvailablePackages {{ java_feature_id }}
+        docker exec --user was {{ container_name }} /opt/IBM/InstallationManager/eclipse/tools/imcl listAvailablePackages 
         -repositories {{ was_repo_path }}
         -log /tmp/java_list_log.xml
         
