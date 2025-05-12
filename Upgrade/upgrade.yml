@@ -33,10 +33,10 @@
       shell: >
         docker exec {{ container_name }} {{ ihs_install_dir }}/bin/apachectl stop
 
-    - name: Backup WAS profiles
-      shell: |
-        docker exec {{ container_name }} tar czf /tmp/was_profiles.tar.gz {{ was_profile_dir }}
-        docker cp {{ container_name }}:/tmp/was_profiles.tar.gz {{ backup_dir }}/was_profiles.tar.gz
+    #- name: Backup WAS profiles
+    #  shell: |
+    #    docker exec {{ container_name }} tar czf /tmp/was_profiles.tar.gz {{ was_profile_dir }}
+    #    docker cp {{ container_name }}:/tmp/was_profiles.tar.gz {{ backup_dir }}/was_profiles.tar.gz
 
     #- name: Backup WAS config (backupConfig.sh)
     #  shell: |
