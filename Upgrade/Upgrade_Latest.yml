@@ -21,58 +21,51 @@
     was_password: ""
 
   tasks:
-
     - name: Stop WebSphere Application Server
       shell: >
-        docker exec {{ container_name }}
-        /opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin/stopServer.sh server1
+        docker exec {{ container_name }} /opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin/stopServer.sh server1
         -user {{ was_user }} -password {{ was_password }}
+      register: stop_was
+      ignore_errors: yes
 
     - name: Stop IBM HTTP Server
       shell: >
         docker exec {{ container_name }} {{ ihs_install_dir }}/bin/apachectl stop
+      register: stop_ihs
+      ignore_errors: yes
 
-    - name: List WebSphere Application Server Fix Packs
+    - name: List WAS Fix Packs with memory constraint handling
       shell: >
-        docker exec {{ container_name }}
-        /opt/IBM/InstallationManager/eclipse/tools/imcl listAvailablePackages
-        -repositories {{ was_repo_path }}
+        docker exec --user was {{ container_name }} bash -c 'export JAVA_OPTS="-Xmx512m" && /opt/IBM/InstallationManager/eclipse/tools/imcl listAvailablePackages -repositories {{ was_repo_path }}'
+      register: was_list
+      retries: 3
+      delay: 10
+      until: was_list.rc == 0
 
-    - name: List IBM HTTP Server Fix Packs
+    - name: List IHS Fix Packs with memory constraint handling
       shell: >
-        docker exec {{ container_name }}
-        /opt/IBM/InstallationManager/eclipse/tools/imcl listAvailablePackages
-        -repositories {{ ihs_repo_path }}
+        docker exec --user was {{ container_name }} bash -c 'export JAVA_OPTS="-Xmx512m" && /opt/IBM/InstallationManager/eclipse/tools/imcl listAvailablePackages -repositories {{ ihs_repo_path }}'
+      register: ihs_list
+      retries: 3
+      delay: 10
+      until: ihs_list.rc == 0
 
-    - name: List Java Fix Packs
+    - name: List Java Fix Packs with memory constraint handling
       shell: >
-        docker exec {{ container_name }}
-        /opt/IBM/InstallationManager/eclipse/tools/imcl listAvailablePackages
-        -repositories {{ java_repo_path }}
+        docker exec --user was {{ container_name }} bash -c 'export JAVA_OPTS="-Xmx512m" && /opt/IBM/InstallationManager/eclipse/tools/imcl listAvailablePackages -repositories {{ java_repo_path }}'
+      register: java_list
+      retries: 3
+      delay: 10
+      until: java_list.rc == 0
 
-    - name: Upgrade WebSphere Application Server
+    - name: Upgrade WAS
       shell: >
-        docker exec --user was {{ container_name }}
-        /opt/IBM/InstallationManager/eclipse/tools/imcl install {{ was_feature_id }}
-        -repositories {{ was_repo_path }}
-        -installationDirectory {{ was_install_dir }}
-        -acceptLicense
-        -log /tmp/was_upgrade.log
+        docker exec --user was {{ container_name }} bash -c 'export JAVA_OPTS="-Xmx512m" && /opt/IBM/InstallationManager/eclipse/tools/imcl install {{ was_feature_id }} -repositories {{ was_repo_path }} -installationDirectory {{ was_install_dir }} -acceptLicense -log /tmp/was_upgrade.log'
 
-    - name: Upgrade IBM HTTP Server
+    - name: Upgrade IHS
       shell: >
-        docker exec --user was {{ container_name }}
-        /opt/IBM/InstallationManager/eclipse/tools/imcl install {{ ihs_feature_id }}
-        -repositories {{ ihs_repo_path }}
-        -installationDirectory {{ ihs_install_dir }}
-        -acceptLicense
-        -log /tmp/ihs_upgrade.log
+        docker exec --user was {{ container_name }} bash -c 'export JAVA_OPTS="-Xmx512m" && /opt/IBM/InstallationManager/eclipse/tools/imcl install {{ ihs_feature_id }} -repositories {{ ihs_repo_path }} -installationDirectory {{ ihs_install_dir }} -acceptLicense -log /tmp/ihs_upgrade.log'
 
     - name: Upgrade Java
       shell: >
-        docker exec --user was {{ container_name }}
-        /opt/IBM/InstallationManager/eclipse/tools/imcl install {{ java_feature_id }}
-        -repositories {{ java_repo_path }}
-        -installationDirectory {{ java_install_dir }}
-        -acceptLicense
-        -log /tmp/java_upgrade.log
+        docker exec --user was {{ container_name }} bash -c 'export JAVA_OPTS="-Xmx512m" && /opt/IBM/InstallationManager/eclipse/tools/imcl install {{ java_feature_id }} -repositories {{ java_repo_path }} -installationDirectory {{ java_install_dir }} -acceptLicense -log /tmp/java_upgrade.log'
