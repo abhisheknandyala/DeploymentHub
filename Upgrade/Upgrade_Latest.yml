@@ -46,17 +46,44 @@
       register: was_list
       ignore_errors: yes
 
+    - name: Ensure Docker container is running
+      shell: docker start {{ container_name }}
+      register: container_start_result
+      ignore_errors: yes
+
+    - name: Wait for container to be healthy (grace period)
+      pause:
+        seconds: 10
+
     - name: List IBM HTTP Server Fix Packs
       shell: >
         docker exec --user was {{ container_name }} bash -lc "export JAVA_OPTS='-Xmx512m' && /opt/IBM/InstallationManager/eclipse/tools/imcl listAvailablePackages -repositories {{ ihs_repo_path }}"
       register: ihs_list
       ignore_errors: yes
+    
+    - name: Ensure Docker container is running
+      shell: docker start {{ container_name }}
+      register: container_start_result
+      ignore_errors: yes
+
+    - name: Wait for container to be healthy (grace period)
+      pause:
+        seconds: 10
 
     - name: List Java Fix Packs
       shell: >
         docker exec --user was {{ container_name }} bash -lc "export JAVA_OPTS='-Xmx512m' && /opt/IBM/InstallationManager/eclipse/tools/imcl listAvailablePackages -repositories {{ java_repo_path }}"
       register: java_list
       ignore_errors: yes
+
+    - name: Ensure Docker container is running
+      shell: docker start {{ container_name }}
+      register: container_start_result
+      ignore_errors: yes
+
+    - name: Wait for container to be healthy (grace period)
+      pause:
+        seconds: 10
 
     - name: Upgrade WebSphere Application Server
       shell: >
