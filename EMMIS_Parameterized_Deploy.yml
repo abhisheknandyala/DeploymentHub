@@ -17,11 +17,11 @@
     script_container_dir: "/opt/WAS/scripts"
     update_scripts_dir: "/home/anandyala/WAS/Emmis/scripts"
 
-    ear_list:
-      - name: "medicaid_EAR6.ear"
-        script: "update_medicaid_app.py"
-      - name: "medicaidSupplementsEAR.ear"
-        script: "updatemedicaidSupplements_app.py"
+   # ear_list:
+   #   - name: "medicaid_EAR6.ear"
+   #     script: "update_medicaid_app.py"
+   #   - name: "medicaidSupplementsEAR.ear"
+   #     script: "updatemedicaidSupplements_app.py"
 
     was_profile_wsadmin: "/opt/IBM/WebSphere/AppServer_Emmis/profiles/AppSrv01_eMMIS/bin/wsadmin.sh"
 
