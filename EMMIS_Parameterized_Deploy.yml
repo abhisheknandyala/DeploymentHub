@@ -1,6 +1,6 @@
 - name: Download and Deploy EARs to WebSphere
   hosts: "{{ target_host }}" 
-  become: yes
+ # become: yes
 
   vars:
     container_name: ""  # Prompt at Launch
