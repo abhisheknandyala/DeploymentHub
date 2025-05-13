@@ -5,7 +5,7 @@
   vars:
     container_name: ""
     script_source_path: "upgrade_was_ihs_java.sh"
-    script_dest_path: "/tmp/upgrade_was_ihs_java.sh"
+    script_dest_path: "/work/upgrade_was_ihs_java.sh"
 
     # Parameters for the script
     was_install_dir: ""
