@@ -1,0 +1,45 @@
+- name: Run upgrade_was_ihs_java.sh inside Docker container
+  hosts: "{{ target_host }}"
+  become: yes
+
+  vars:
+    container_name: ""
+    script_source_path: "upgrade_was_ihs_java.sh"
+    script_dest_path: "/tmp/upgrade_was_ihs_java.sh"
+
+    # Parameters for the script
+    was_install_dir: ""
+    was_repo_path: ""
+    was_feature_id: ""
+    ihs_install_dir: ""
+    ihs_repo_path: ""
+    ihs_feature_id: ""
+    java_install_dir: ""
+    java_repo_path: ""
+    java_feature_id: ""
+    was_user: ""
+    was_password: ""
+
+  tasks:
+    - name: Copy upgrade script into container
+      shell: |
+        docker cp {{ script_source_path }} {{ container_name }}:{{ script_dest_path }}
+
+    - name: Make script executable inside container
+      shell: |
+        docker exec {{ container_name }} chmod +x {{ script_dest_path }}
+
+    - name: Execute the upgrade script inside container
+      shell: >
+        docker exec {{ container_name }} bash {{ script_dest_path }}
+        "{{ was_install_dir }}"
+        "{{ was_repo_path }}"
+        "{{ was_feature_id }}"
+        "{{ ihs_install_dir }}"
+        "{{ ihs_repo_path }}"
+        "{{ ihs_feature_id }}"
+        "{{ java_install_dir }}"
+        "{{ java_repo_path }}"
+        "{{ java_feature_id }}"
+        "{{ was_user }}"
+        "{{ was_password }}"
