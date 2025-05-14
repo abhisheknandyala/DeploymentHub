@@ -1,51 +1,53 @@
-- name: Run upgrade_was_ihs_java.sh inside Docker container
+- name: Copy and Execute WAS, IHS, and Java Upgrade Script Inside Container
   hosts: "{{ target_host }}"
   become: yes
 
   vars:
-    container_name: ""
-    script_source_path: "upgrade_was_ihs_java.sh"
-    script_dest_path: "/work/upgrade_was_ihs_java.sh"
+    container_name: "emmis-t0-w1234"
+    local_script_path: "/home/anandyala/upgrade_was_ihs_java.sh"
+    container_script_path: "/work/upgrade_was_ihs_java.sh"
 
-    # Parameters for the script
-    was_install_dir: ""
-    was_repo_path: ""
-    was_feature_id: ""
-    ihs_install_dir: ""
-    ihs_repo_path: ""
-    ihs_feature_id: ""
-    java_install_dir: ""
-    java_repo_path: ""
-    java_feature_id: ""
+    # Passed via survey or template
     was_user: ""
     was_password: ""
 
+    was_feature_id: ""
+    was_repo_path: ""
+    was_install_dir: ""
+
+    ihs_feature_id: ""
+    ihs_repo_path: ""
+    ihs_install_dir: ""
+
+    java_feature_id: ""
+    java_repo_path: ""
+    java_install_dir: ""
+
   tasks:
-    - name: Copy upgrade script to Docker host (into /home/anandyala)
-      copy:
-        src: upgrade_was_ihs_java.sh
-        dest: /home/anandyala/upgrade_was_ihs_java.sh
-        mode: '0755'
+
+    - name: Ensure the local script exists
+      stat:
+        path: "{{ local_script_path }}"
+      register: local_script
+      failed_when: not local_script.stat.exists
 
     - name: Copy upgrade script into container
-      shell: |
-        docker cp {{ script_source_path }} {{ container_name }}:{{ script_dest_path }}
+      shell: docker cp "{{ local_script_path }}" {{ container_name }}:{{ container_script_path }}
 
     - name: Make script executable inside container
-      shell: |
-        docker exec {{ container_name }} chmod +x {{ script_dest_path }}
+      shell: docker exec {{ container_name }} chmod +x {{ container_script_path }}
 
     - name: Execute the upgrade script inside container
-      shell: >
-        docker exec {{ container_name }} bash {{ script_dest_path }}
-        "{{ was_install_dir }}"
-        "{{ was_repo_path }}"
-        "{{ was_feature_id }}"
-        "{{ ihs_install_dir }}"
-        "{{ ihs_repo_path }}"
-        "{{ ihs_feature_id }}"
+      shell: |
+        docker exec {{ container_name }} bash {{ container_script_path }} \
+        "{{ was_user }}" \
+        "{{ was_password }}" \
+        "{{ was_feature_id }}" \
+        "{{ was_repo_path }}" \
+        "{{ was_install_dir }}" \
+        "{{ ihs_feature_id }}" \
+        "{{ ihs_repo_path }}" \
+        "{{ ihs_install_dir }}" \
+        "{{ java_feature_id }}" \
+        "{{ java_repo_path }}" \
         "{{ java_install_dir }}"
-        "{{ java_repo_path }}"
-        "{{ java_feature_id }}"
-        "{{ was_user }}"
-        "{{ was_password }}"
