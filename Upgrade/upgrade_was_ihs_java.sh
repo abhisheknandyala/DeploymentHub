@@ -42,7 +42,7 @@ echo "Upgrading WAS..."
   -repositories "$WAS_REPO_PATH" \
   -installationDirectory "$WAS_INSTALL_DIR" \
   -acceptLicense \
-  -log /work/was_upgrade.log
+  
 
 # === Upgrade IHS ===
 echo "Upgrading IHS..."
@@ -50,7 +50,7 @@ echo "Upgrading IHS..."
   -repositories "$IHS_REPO_PATH" \
   -installationDirectory "$IHS_INSTALL_DIR" \
   -acceptLicense \
-  -log /work/ihs_upgrade.log
+  
 
 # === Upgrade Java ===
 echo "Upgrading Java..."
@@ -58,4 +58,4 @@ echo "Upgrading Java..."
   -repositories "$JAVA_REPO_PATH" \
   -installationDirectory "$JAVA_INSTALL_DIR" \
   -acceptLicense \
-  -log /work/java_upgrade.log
+  
