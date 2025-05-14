@@ -1,14 +1,53 @@
-  - name: Execute the upgrade script inside container
-    shell: >
-      docker exec --user was {{ container_name }} bash {{ container_script_path }}
-      "{{ was_user }}"
-      "{{ was_password }}"
-      "{{ was_feature_id }}"
-      "{{ was_repo_path }}"
-      "{{ was_install_dir }}"
-      "{{ ihs_feature_id }}"
-      "{{ ihs_repo_path }}"
-      "{{ ihs_install_dir }}"
-      "{{ java_feature_id }}"
-      "{{ java_repo_path }}"
-      "{{ java_install_dir }}"
+- name: Copy and Execute WAS, IHS, and Java Upgrade Script Inside Container
+  hosts: "{{ target_host }}"
+  become: yes
+
+  vars:
+    container_name: "emmis-t0-w1234"
+    local_script_path: "/home/anandyala/upgrade_was_ihs_java.sh"
+    container_script_path: "/work/upgrade_was_ihs_java.sh"
+
+    # These will be passed via Survey or Extra Vars
+    was_user: ""
+    was_password: ""
+
+    was_feature_id: ""
+    was_repo_path: ""
+    was_install_dir: ""
+
+    ihs_feature_id: ""
+    ihs_repo_path: ""
+    ihs_install_dir: ""
+
+    java_feature_id: ""
+    java_repo_path: ""
+    java_install_dir: ""
+
+  tasks:
+
+    - name: Copy upgrade script to Docker host
+      copy:
+        src: upgrade_was_ihs_java.sh
+        dest: "{{ local_script_path }}"
+        mode: '0755'
+
+    - name: Copy script into Docker container
+      shell: docker cp "{{ local_script_path }}" {{ container_name }}:{{ container_script_path }}
+
+    - name: Make script executable inside container
+      shell: docker exec {{ container_name }} chmod +x {{ container_script_path }}
+
+    - name: Execute the upgrade script inside container
+      shell: >
+        docker exec --user was {{ container_name }} bash {{ container_script_path }}
+        "{{ was_user }}"
+        "{{ was_password }}"
+        "{{ was_feature_id }}"
+        "{{ was_repo_path }}"
+        "{{ was_install_dir }}"
+        "{{ ihs_feature_id }}"
+        "{{ ihs_repo_path }}"
+        "{{ ihs_install_dir }}"
+        "{{ java_feature_id }}"
+        "{{ java_repo_path }}"
+        "{{ java_install_dir }}"
