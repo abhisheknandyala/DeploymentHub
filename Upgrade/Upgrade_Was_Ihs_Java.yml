@@ -43,16 +43,17 @@
       shell: docker exec {{ container_name }} chmod +x {{ container_script_path }}
 
     - name: Execute the upgrade script inside container
-      shell: |
-        docker exec {{ container_name }} bash {{ container_script_path }} \
-        "{{ was_user }}" \
-        "{{ was_password }}" \
-        "{{ was_feature_id }}" \
-        "{{ was_repo_path }}" \
-        "{{ was_install_dir }}" \
-        "{{ ihs_feature_id }}" \
-        "{{ ihs_repo_path }}" \
-        "{{ ihs_install_dir }}" \
-        "{{ java_feature_id }}" \
-        "{{ java_repo_path }}" \
-        "{{ java_install_dir }}"
+  shell: >
+    docker exec --user was {{ container_name }} bash {{ container_script_path }}
+    "{{ was_user }}"
+    "{{ was_password }}"
+    "{{ was_feature_id }}"
+    "{{ was_repo_path }}"
+    "{{ was_install_dir }}"
+    "{{ ihs_feature_id }}"
+    "{{ ihs_repo_path }}"
+    "{{ ihs_install_dir }}"
+    "{{ java_feature_id }}"
+    "{{ java_repo_path }}"
+    "{{ java_install_dir }}"
+
