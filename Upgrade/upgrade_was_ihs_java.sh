@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# === Positional Parameters ===
+# Parameters ===
 WAS_USER=$1
 WAS_PASSWORD=$2
 
