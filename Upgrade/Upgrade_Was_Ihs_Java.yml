@@ -30,6 +30,11 @@
   #      path: "{{ local_script_path }}"
   #    register: local_script
   #    failed_when: not local_script.stat.exists
+    - name: Copy upgrade script to Docker host (into /home/anandyala)
+      copy:
+        src: upgrade_was_ihs_java.sh
+        dest: /home/anandyala/upgrade_was_ihs_java.sh
+        mode: '0755'
 
     - name: Copy upgrade script into container
       shell: docker cp "{{ local_script_path }}" {{ container_name }}:{{ container_script_path }}
