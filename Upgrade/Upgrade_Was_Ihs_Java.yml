@@ -25,11 +25,11 @@
 
   tasks:
 
-    - name: Ensure the local script exists
-      stat:
-        path: "{{ local_script_path }}"
-      register: local_script
-      failed_when: not local_script.stat.exists
+  #  - name: Ensure the local script exists
+  #    stat:
+  #      path: "{{ local_script_path }}"
+  #    register: local_script
+  #    failed_when: not local_script.stat.exists
 
     - name: Copy upgrade script into container
       shell: docker cp "{{ local_script_path }}" {{ container_name }}:{{ container_script_path }}
