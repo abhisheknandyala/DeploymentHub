@@ -25,7 +25,7 @@
 
   tasks:
 
-    - name: Ensure the local script exists
+    - name: Ensure the local script exists before copy
       stat:
         path: "{{ local_script_path }}"
       register: local_script
@@ -33,9 +33,11 @@
 
     - name: Copy upgrade script into container
       shell: docker cp "{{ local_script_path }}" {{ container_name }}:{{ container_script_path }}
+      when: not ansible_check_mode
 
     - name: Make script executable inside container
       shell: docker exec {{ container_name }} chmod +x {{ container_script_path }}
+      when: not ansible_check_mode
 
     - name: Execute the upgrade script inside container
       shell: |
@@ -51,3 +53,4 @@
         "{{ java_feature_id }}" \
         "{{ java_repo_path }}" \
         "{{ java_install_dir }}"
+      when: not ansible_check_mode
