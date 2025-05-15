@@ -49,16 +49,16 @@
         mode: '0755'
 
 
-    - name: Copy update scripts to target host
-      copy:
-        src: "{{ item }}"
-        dest: "{{ update_scripts_dir }}/{{ item }}"
-        owner: "{{ owner }}"
-        group: "{{ owner }}"
-        mode: '0755'
-      loop:
-        - "update_medicaid_app.py"
-        - "updatemedicaidSupplements_app.py"
+ #   - name: Copy update scripts to target host
+ #     copy:
+ #       src: "{{ item }}"
+ #       dest: "{{ update_scripts_dir }}/{{ item }}"
+ #       owner: "{{ owner }}"
+ #       group: "{{ owner }}"
+ #       mode: '0755'
+ #     loop:
+ #       - "update_medicaid_app.py"
+ #       - "updatemedicaidSupplements_app.py"
 
 
     - name: Download EAR files from Jenkins
