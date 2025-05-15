@@ -75,12 +75,12 @@
       loop_control:
         label: "{{ item.name }}"
 
-    - name: Create EAR and script directories inside container
-      block:
-        - name: Create EAR directory
-          command: docker exec {{ container_name }} mkdir -p {{ ear_container_dir }}
-        - name: Create script directory
-          command: docker exec {{ container_name }} mkdir -p {{ script_container_dir }}
+  #  - name: Create EAR and script directories inside container
+  #    block:
+  #      - name: Create EAR directory
+  #        command: docker exec {{ container_name }} mkdir -p {{ ear_container_dir }}
+  #      - name: Create script directory
+  #        command: docker exec {{ container_name }} mkdir -p {{ script_container_dir }}
 
     - name: Remove old EARs from container
       loop: "{{ ear_list }}"
