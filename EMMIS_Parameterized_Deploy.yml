@@ -40,13 +40,13 @@
         group: "{{ owner }}"
         mode: '0755'
 
-    - name: Ensure update_scripts_dir exists on host
-      file:
-        path: "{{ update_scripts_dir }}"
-        state: directory
-        owner: "{{ owner }}"
-        group: "{{ owner }}"
-        mode: '0755'
+#    - name: Ensure update_scripts_dir exists on host
+#      file:
+#        path: "{{ update_scripts_dir }}"
+#        state: directory
+#        owner: "{{ owner }}"
+#        group: "{{ owner }}"
+#        mode: '0755'
 
 
     - name: Copy update scripts to target host
