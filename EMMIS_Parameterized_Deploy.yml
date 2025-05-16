@@ -39,26 +39,29 @@
         owner: "{{ owner }}"
         group: "{{ owner }}"
         mode: '0755'
+      when: prepare_directories_and_scripts | bool
 
-#    - name: Ensure update_scripts_dir exists on host
-#      file:
-#        path: "{{ update_scripts_dir }}"
-#        state: directory
-#        owner: "{{ owner }}"
-#        group: "{{ owner }}"
-#        mode: '0755'
+    - name: Ensure update_scripts_dir exists on host
+      file:
+        path: "{{ update_scripts_dir }}"
+        state: directory
+        owner: "{{ owner }}"
+        group: "{{ owner }}"
+        mode: '0755'
+      when: prepare_directories_and_scripts | bool
 
 
-#    - name: Copy update scripts to target host
-#      copy:
-#        src: "{{ item }}"
-#        dest: "{{ update_scripts_dir }}/{{ item }}"
-#        owner: "{{ owner }}"
-#        group: "{{ owner }}"
-#        mode: '0755'
-#      loop:
-#        - "update_medicaid_app.py"
-#        - "updatemedicaidSupplements_app.py"
+    - name: Copy update scripts to target host
+      copy:
+        src: "{{ item }}"
+        dest: "{{ update_scripts_dir }}/{{ item }}"
+        owner: "{{ owner }}"
+        group: "{{ owner }}"
+        mode: '0755'
+      loop:
+        - "update_medicaid_app.py"
+        - "updatemedicaidSupplements_app.py"
+      when: prepare_directories_and_scripts | bool
 
 
     - name: Download EAR files from Jenkins
