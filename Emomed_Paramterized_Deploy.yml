@@ -45,6 +45,7 @@
         owner: anandyala
         group: anandyala
         mode: '0755'
+      when: prepare_directories_and_scripts | bool
 
     - name: Ensure update_scripts_dir exists on host
       file:
