@@ -54,6 +54,7 @@
         owner: anandyala
         group: anandyala
         mode: '0755'
+      when: prepare_directories_and_scripts | bool
     
     - name: Copy Emomed_Update_ear.py to update_scripts_dir on host
       copy:
@@ -62,6 +63,7 @@
         owner: anandyala
         group: anandyala
         mode: '0755'
+      when: prepare_directories_and_scripts | bool
 
     - name: Download all EARs from Jenkins
       get_url:
