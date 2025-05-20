@@ -36,8 +36,8 @@
       file:
         path: "{{ ear_dest_dir }}"
         state: directory
-        owner: "{{ owner }}"
-        group: "{{ owner }}"
+#        owner: "{{ owner }}"
+#        group: "{{ owner }}"
         mode: '0755'
       when: prepare_directories_and_scripts | bool
 
@@ -45,8 +45,8 @@
       file:
         path: "{{ update_scripts_dir }}"
         state: directory
-        owner: "{{ owner }}"
-        group: "{{ owner }}"
+#       owner: "{{ owner }}"
+#       group: "{{ owner }}"
         mode: '0755'
       when: prepare_directories_and_scripts | bool
 
@@ -55,8 +55,8 @@
       copy:
         src: "{{ item }}"
         dest: "{{ update_scripts_dir }}/{{ item }}"
-        owner: "{{ owner }}"
-        group: "{{ owner }}"
+#        owner: "{{ owner }}"
+#        group: "{{ owner }}"
         mode: '0755'
       loop:
         - "update_medicaid_app.py"
