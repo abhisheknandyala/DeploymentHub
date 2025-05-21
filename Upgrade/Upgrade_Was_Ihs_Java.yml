@@ -4,10 +4,10 @@
 
   vars:
     container_name: "emmis-t0-w1234"
-    local_script_path: "/home/anandyala/upgrade_was_ihs_java.sh"
+    local_script_path: "upgrade_was_ihs_java.sh"
     container_script_path: "/work/upgrade_was_ihs_java.sh"
 
-    # These will be passed via Survey or Extra Vars
+    # Passed via survey or template
     was_user: ""
     was_password: ""
 
@@ -22,17 +22,25 @@
     java_feature_id: ""
     java_repo_path: ""
     java_install_dir: ""
+    shared_resources_path: "/work/im_shared"
 
   tasks:
+    - name: Ensure shared resources directory exists on Docker host
+      file:
+        path: "{{ shared_resources_path }}"
+        state: directory
+        mode: '0775'
+        owner: was
+        group: was
 
     - name: Copy upgrade script to Docker host
       copy:
-        src: upgrade_was_ihs_java.sh
+        src: "{{ local_script_path }}"
         dest: "{{ local_script_path }}"
         mode: '0755'
 
-    - name: Copy script into Docker container
-      shell: docker cp "{{ local_script_path }}" {{ container_name }}:{{ container_script_path }}
+    - name: Copy upgrade script into container
+      shell: docker cp "{{ local_script_path }}" {{ container_name }}:"{{ container_script_path }}"
 
     - name: Make script executable inside container
       shell: docker exec {{ container_name }} chmod +x {{ container_script_path }}
@@ -51,3 +59,7 @@
         "{{ java_feature_id }}"
         "{{ java_repo_path }}"
         "{{ java_install_dir }}"
+
+    - name: Optionally start IHS as root if needed (port 80 restriction)
+      shell: docker exec {{ container_name }} /opt/IBM/HTTPServer/bin/apachectl start
+      when: ansible_user == 'root'
