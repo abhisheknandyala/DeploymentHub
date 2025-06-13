@@ -2,19 +2,19 @@
   hosts: java_upgrade_targets
   become: true
   vars:
-    imcl_path: ""
-    repo_path: ""
-    install_dir: ""
-    feature_id: ""
+    imcl_path: "/opt/IBM/InstallationManager/eclipse/tools/imcl"
+    repo_path: "/opt/java/binaries"
+    install_dir: "/opt/IBM/Java80"
+    feature_id: "com.ibm.java.jdk.v8_8.0.8022.20240415_1355"
   tasks:
     - name: Upgrade Java using IMCL
       shell: >
-        {{ imcl_path }} install {{ feature_id }}
-        -repositories {{ repo_path }}
-        -installationDirectory {{ install_dir }}
+        "{{ imcl_path }}" install "{{ feature_id }}"
+        -repositories "{{ repo_path }}"
+        -installationDirectory "{{ install_dir }}"
         -acceptLicense
       register: upgrade_result
 
     - name: Check upgrade result
       debug:
-        var: upgrade_result
+        var: upgrade_result.stdout_lines
