@@ -1,11 +1,13 @@
 - name: Upgrade IBM Java using IMCL
   hosts: java_upgrade_targets
+- name: Disable git SSL verification (temp workaround)
+  shell: git config --global http.sslVerify false
   become: true
   vars:
     imcl_path: "/opt/IBM/InstallationManager/eclipse/tools/imcl"
     repo_path: ""
-    install_dir: "/opt/IBM/Java80"
-    feature_id: "com.ibm.java.jdk.v8_8.0.8022.20240415_1355"
+    install_dir: ""
+    feature_id: ""
   tasks:
     - name: Upgrade Java using IMCL
       shell: >
