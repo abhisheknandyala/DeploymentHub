@@ -1,0 +1,68 @@
+---
+- name: Upgrade Java, WAS, and WPS via Installation Manager
+  hosts: all
+  become: true
+  vars:
+    java_feature_id: "{{ java_feature_id }}"
+    was_feature_id: "{{ was_feature_id }}"
+    wps_feature_id: "{{ wps_feature_id }}"
+
+    java_repo_path: "{{ java_repo_path }}"
+    was_repo_path: "{{ was_repo_path }}"
+    wps_repo_path: "{{ wps_repo_path }}"
+
+    java_install_dir: "{{ java_install_dir }}"
+    was_install_dir: "{{ was_install_dir }}"
+    wps_install_dir: "{{ wps_install_dir }}"
+
+    shared_dir: "{{ shared_dir }}"
+
+  tasks:
+    - name: Ensure shared resources directory exists
+      file:
+        path: "{{ shared_dir }}"
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Kill WAS and WPS processes if running
+      shell: |
+        pkill -f java || true
+        sleep 5
+
+    - name: Upgrade Java
+      shell: >
+        /opt/IBM/InstallationManager/eclipse/tools/imcl install "{{ java_feature_id }}"
+        -repositories "{{ java_repo_path }}"
+        -installationDirectory "{{ java_install_dir }}"
+        -sharedResourcesDirectory "{{ shared_dir }}"
+        -acceptLicense
+      register: java_result
+      failed_when: "'ERROR' in java_result.stderr"
+
+    - name: Upgrade WAS
+      shell: >
+        /opt/IBM/InstallationManager/eclipse/tools/imcl install "{{ was_feature_id }}"
+        -repositories "{{ was_repo_path }}"
+        -installationDirectory "{{ was_install_dir }}"
+        -sharedResourcesDirectory "{{ shared_dir }}"
+        -acceptLicense
+      register: was_result
+      failed_when: "'ERROR' in was_result.stderr"
+
+    - name: Upgrade WPS
+      shell: >
+        /opt/IBM/InstallationManager/eclipse/tools/imcl install "{{ wps_feature_id }}"
+        -repositories "{{ wps_repo_path }}"
+        -installationDirectory "{{ wps_install_dir }}"
+        -sharedResourcesDirectory "{{ shared_dir }}"
+        -acceptLicense
+      register: wps_result
+      failed_when: "'ERROR' in wps_result.stderr"
+
+    - name: Start WAS
+      shell: "{{ was_install_dir }}/profiles/AppSrv01/bin/startServer.sh server1"
+
+    - name: Start WPS
+      shell: "{{ wps_install_dir }}/bin/startServer.sh WebSphere_Portal"
