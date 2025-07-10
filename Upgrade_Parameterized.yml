@@ -1,0 +1,83 @@
+---
+- name: Upgrade Java, WAS, and WPS if feature ID is provided
+  hosts: all
+  become: true
+  vars:
+    shared_resources_dir: /work/im_shared
+
+  tasks:
+
+    - name: Ensure shared resources directory exists
+      file:
+        path: "{{ shared_resources_dir }}"
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Upgrade Java if java_feature_id is set
+      block:
+        - name: Upgrade Java
+          command: >
+            /opt/IBM/InstallationManager/eclipse/tools/imcl install "{{ java_feature_id }}"
+            -repositories "{{ java_repo_path }}"
+            -installationDirectory "{{ java_install_dir }}"
+            -sharedResourcesDirectory "{{ shared_resources_dir }}"
+            -acceptLicense
+          register: java_result
+          changed_when: "'Installed' in java_result.stdout or 'updated' in java_result.stdout"
+
+        - name: Print Java upgrade result
+          debug:
+            var: java_result.stdout_lines
+      when: java_feature_id is defined and java_feature_id | length > 0
+
+    - name: Upgrade WAS if was_feature_id is set
+      block:
+        - name: Gracefully stop WAS
+          command: "{{ was_install_dir }}/bin/stopServer.sh server1 -username {{ was_user }} -password {{ was_password }}"
+          ignore_errors: true
+
+        - name: Upgrade WAS
+          command: >
+            /opt/IBM/InstallationManager/eclipse/tools/imcl install "{{ was_feature_id }}"
+            -repositories "{{ was_repo_path }}"
+            -installationDirectory "{{ was_install_dir }}"
+            -sharedResourcesDirectory "{{ shared_resources_dir }}"
+            -acceptLicense
+          register: was_result
+          changed_when: "'Installed' in was_result.stdout or 'updated' in was_result.stdout"
+
+        - name: Print WAS upgrade result
+          debug:
+            var: was_result.stdout_lines
+
+        - name: Start WAS
+          command: "{{ was_install_dir }}/bin/startServer.sh server1"
+          ignore_errors: true
+      when: was_feature_id is defined and was_feature_id | length > 0
+
+    - name: Upgrade WPS if wps_feature_id is set
+      block:
+        - name: Gracefully stop WPS
+          command: "{{ wps_install_dir }}/bin/stopServer.sh server1 -username {{ was_user }} -password {{ was_password }}"
+          ignore_errors: true
+
+        - name: Upgrade WPS
+          command: >
+            /opt/IBM/InstallationManager/eclipse/tools/imcl install "{{ wps_feature_id }}"
+            -repositories "{{ wps_repo_path }}"
+            -installationDirectory "{{ wps_install_dir }}"
+            -sharedResourcesDirectory "{{ shared_resources_dir }}"
+            -acceptLicense
+          register: wps_result
+          changed_when: "'Installed' in wps_result.stdout or 'updated' in wps_result.stdout"
+
+        - name: Print WPS upgrade result
+          debug:
+            var: wps_result.stdout_lines
+
+        - name: Start WPS
+          command: "{{ wps_install_dir }}/bin/startServer.sh server1"
+          ignore_errors: true
+      when: wps_feature_id is defined and wps_feature_id | length > 0

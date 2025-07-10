@@ -1,0 +1,58 @@
+---
+- name: Upgrade Java, WAS, and WPS with fallback shared resources dir
+  hosts: all
+  become: yes
+  vars:
+    shared_dir: "/work/im_shared"
+
+  tasks:
+    - name: Ensure shared resources directory is valid or fallback to /tmp/im_shared
+      block:
+        - name: Check if provided shared directory exists and is writable
+          ansible.builtin.stat:
+            path: "{{ shared_dir }}"
+          register: shared_dir_stat
+
+        - name: Set fallback shared directory if the provided one is invalid
+          set_fact:
+            effective_shared_dir: "/tmp/im_shared"
+          when: not shared_dir_stat.stat.exists or not shared_dir_stat.stat.writable
+
+        - name: Use provided shared directory if valid
+          set_fact:
+            effective_shared_dir: "{{ shared_dir }}"
+          when: shared_dir_stat.stat.exists and shared_dir_stat.stat.writable
+
+        - name: Create fallback shared directory if using it
+          file:
+            path: "{{ effective_shared_dir }}"
+            state: directory
+            mode: "0775"
+          when: effective_shared_dir == "/tmp/im_shared"
+
+    - name: Upgrade Java
+      command: >
+        /opt/IBM/InstallationManager/eclipse/tools/imcl install "{{ java_feature_id }}"
+        -repositories "{{ java_repo_path }}"
+        -installationDirectory "{{ java_install_dir }}"
+        -sharedResourcesDirectory "{{ effective_shared_dir }}"
+        -acceptLicense
+      when: java_feature_id is defined and java_repo_path is defined and java_install_dir is defined
+
+    - name: Upgrade WAS
+      command: >
+        /opt/IBM/InstallationManager/eclipse/tools/imcl install "{{ was_feature_id }}"
+        -repositories "{{ was_repo_path }}"
+        -installationDirectory "{{ was_install_dir }}"
+        -sharedResourcesDirectory "{{ effective_shared_dir }}"
+        -acceptLicense
+      when: was_feature_id is defined and was_repo_path is defined and was_install_dir is defined
+
+    - name: Upgrade WPS
+      command: >
+        /opt/IBM/InstallationManager/eclipse/tools/imcl install "{{ wps_feature_id }}"
+        -repositories "{{ wps_repo_path }}"
+        -installationDirectory "{{ wps_install_dir }}"
+        -sharedResourcesDirectory "{{ effective_shared_dir }}"
+        -acceptLicense
+      when: wps_feature_id is defined and wps_repo_path is defined and wps_install_dir is defined
